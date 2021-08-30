@@ -1,0 +1,5 @@
+vendor
+.idea
+run.log
+sonar-project.properties
+.scannerwork/
