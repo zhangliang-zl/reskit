@@ -3,8 +3,6 @@ package server
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/zhangliang-zl/reskit/helpers/validation"
 	"github.com/zhangliang-zl/reskit/logs"
 )
 
@@ -54,8 +52,4 @@ func noRoute(c *gin.Context) {
 
 func noMethod(c *gin.Context) {
 	sendError(c, NewMethodNotAllowed("405 method not allowed"))
-}
-
-func BindValidator(validator *validation.Validator) {
-	binding.Validator = validator
 }

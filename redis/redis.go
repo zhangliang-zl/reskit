@@ -32,7 +32,7 @@ func New(opts Options, logger logs.Logger) (*redis.Client, error) {
 		return client, err
 	}
 
-	redis.SetLogger(&logging{l: logger})
+	redis.SetLogger(&logWriter{l: logger})
 	client.AddHook(logHook{
 		l: logger,
 	})

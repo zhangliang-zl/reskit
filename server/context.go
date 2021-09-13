@@ -22,6 +22,10 @@ func (c *Context) BadRequest(err error) {
 	sendError(c.Context, NewBadRequest(err.Error()))
 }
 
+func (c *Context) ClientError(httpCode int, err error) {
+	sendError(c.Context, NewError(httpCode, err.Error()))
+}
+
 func (c *Context) InternalError(err error) {
 	sendError(c.Context, NewInternalError(err.Error()))
 }
