@@ -13,7 +13,7 @@ import (
 var factory Factory
 
 func init() {
-	loggerFactory := logs.NewFactory("debug", stdout.Driver())
+	loggerFactory := logs.NewFactory(logs.LevelInfo, stdout.Driver())
 	redisLogger, _ := loggerFactory.Get("redis")
 	kvStore, _ := redis.New(redis.Options{
 		Addr:     "localhost:6379",

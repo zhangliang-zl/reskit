@@ -7,8 +7,8 @@ import (
 )
 
 func TestLogger(t *testing.T) {
-	f := NewFactory(LevelInfo, stdout.Driver())
-	l, err := f.Get("haha")
+	fac := NewFactory(LevelInfo, stdout.Driver())
+	l, err := fac.Get("haha")
 	if err != nil {
 		t.Fatal(err)
 	}

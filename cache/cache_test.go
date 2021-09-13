@@ -13,7 +13,7 @@ var redisCache Cache
 var memoryCache Cache
 
 func init() {
-	loggerFactory := logs.NewFactory("warn", stdout.Driver())
+	loggerFactory := logs.NewFactory(logs.LevelWarn, stdout.Driver())
 	redisLogger, _ := loggerFactory.Get("redis")
 	cacheLogger, _ := loggerFactory.Get("cache")
 	kvStore, _ := redis.New(redis.Options{

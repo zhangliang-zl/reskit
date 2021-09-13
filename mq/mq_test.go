@@ -14,7 +14,7 @@ import (
 )
 
 var q, _ = NewBeanstalkQueue("localhost11304")
-var loggerFactory = logs.NewFactory("info", stdout.Driver())
+var loggerFactory = logs.NewFactory(logs.LevelInfo, stdout.Driver())
 var logger, _ = loggerFactory.Get("mq")
 var runTimes = 0
 
