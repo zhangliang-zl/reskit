@@ -2,14 +2,18 @@ package logs
 
 import (
 	"context"
-	"fmt"
 	"github.com/zhangliang-zl/reskit/logs/driver/stdout"
 	"testing"
 )
 
 func TestLogger(t *testing.T) {
-	f := NewFactory("warn", stdout.Driver())
-	l, _ := f.Get("haha")
-	fmt.Println(l.Level())
-	l.Info(context.Background(), "haha")
+	f := NewFactory(LevelInfo, stdout.Driver())
+	l, err := f.Get("haha")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := WithTraceID(context.Background())
+	l.Error(ctx, "error message")
+	l.Warn(ctx, "warn message")
 }

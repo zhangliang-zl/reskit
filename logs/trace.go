@@ -7,18 +7,26 @@ import (
 	"time"
 )
 
-const TraceID = "traceID"
+const txID = "txID"
 
-func findTraceID(ctx context.Context) string {
-	txID := ctx.Value(TraceID)
+func GetTraceID(ctx context.Context) string {
+	txID := ctx.Value(txID)
 
 	if txID == nil {
-		newID := NextTraceID()
-		context.WithValue(ctx, TraceID, newID)
-		return newID
+		return ""
 	}
 
 	return txID.(string)
+}
+
+func WithTraceID(ctx context.Context) context.Context {
+	id := ctx.Value(txID)
+
+	if id == nil {
+		id = NextTraceID()
+		ctx = context.WithValue(ctx, txID, id)
+	}
+	return ctx
 }
 
 func NextTraceID() string {

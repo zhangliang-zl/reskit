@@ -5,8 +5,12 @@ import (
 	"sync"
 )
 
+type Factory interface {
+	Get(tag string) (Logger, error)
+}
+
 type factory struct {
-	level   LogLevel
+	level   Level
 	builder driver.WriterBuild
 	sync.Map
 }
@@ -28,9 +32,9 @@ func (f *factory) Get(tag string) (Logger, error) {
 	return v.(Logger), nil
 }
 
-func NewFactory(levelLabel string, writerBuild driver.WriterBuild) Factory {
+func NewFactory(level Level, writerBuild driver.WriterBuild) Factory {
 	return &factory{
-		level:   LevelVal(levelLabel),
+		level:   level,
 		builder: writerBuild,
 	}
 }

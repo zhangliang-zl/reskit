@@ -4,35 +4,35 @@ import (
 	"strings"
 )
 
-type LogLevel uint8
+type Level uint8
 
 const (
-	ERROR LogLevel = 0
-	WARN  LogLevel = 1
-	INFO  LogLevel = 2
-	DEBUG LogLevel = 3
+	LevelError Level = 0
+	LevelWarn  Level = 1
+	LevelInfo  Level = 2
+	LevelDebug Level = 3
 )
 
-var levelLabels = map[LogLevel]string{
-	ERROR: "error",
-	WARN:  "warn",
-	INFO:  "info",
-	DEBUG: "debug",
+var levelNamesMapping = map[Level]string{
+	LevelError: "error",
+	LevelWarn:  "warn",
+	LevelInfo:  "info",
+	LevelDebug: "debug",
 }
 
-func LevelVal(label string) LogLevel {
+func LevelVal(label string) Level {
 	label = strings.ToLower(label)
-	for l, name := range levelLabels {
+	for l, name := range levelNamesMapping {
 		if name == label {
 			return l
 		}
 	}
 
-	return ERROR
+	return LevelError
 }
 
-func LevelName(l LogLevel) string {
-	name, ok := levelLabels[l]
+func LevelName(l Level) string {
+	name, ok := levelNamesMapping[l]
 	if ok {
 		return name
 	}

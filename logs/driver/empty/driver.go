@@ -1,14 +1,13 @@
-package stdout
+package empty
 
 import (
-	"fmt"
 	"github.com/zhangliang-zl/reskit/logs/driver"
 )
 
-type writer struct{}
+type writer struct {
+}
 
 func (r writer) Record(m string) {
-	fmt.Println(m)
 }
 
 func Driver() driver.WriterBuild {
