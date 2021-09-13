@@ -1,9 +1,10 @@
-package snowflake
+package srv
 
 import (
 	"context"
 	"fmt"
 	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/zhangliang-zl/reskit/snowflake"
 	"net"
 	"strconv"
 	"time"
@@ -12,7 +13,7 @@ import (
 type Server struct {
 	port     int
 	logger   logs.Logger
-	idWorker *Worker
+	idWorker *snowflake.Worker
 }
 
 type ServerOptions struct {
@@ -24,13 +25,13 @@ type ServerOptions struct {
 }
 
 func NewServer(opts ServerOptions, logger logs.Logger) (*Server, error) {
-	workerFactory := NewWorkerIDFactory(opts.MysqlDsn)
+	workerFactory := snowflake.NewWorkerIDFactory(opts.MysqlDsn)
 	workerID, err := workerFactory.WorkID()
 	if err != nil {
 		return nil, err
 	}
 
-	idWorker, err := NewWorker(workerID, opts.WorkerBits, opts.NumberBits, opts.Epoch)
+	idWorker, err := snowflake.NewWorker(workerID, opts.WorkerBits, opts.NumberBits, opts.Epoch)
 	if err != nil {
 		return nil, err
 	}

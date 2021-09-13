@@ -1,19 +1,8 @@
 package snowflake
 
 import (
-	"errors"
 	"sync"
 	"time"
-)
-
-const (
-	workerBits  uint8 = 5  // 0-31
-	numberBits  uint8 = 17 // 0-131071
-	workerMax   int64 = -1 ^ (-1 << workerBits)
-	numberMax   int64 = -1 ^ (-1 << numberBits)
-	timeShift         = workerBits + numberBits
-	workerShift       = numberBits
-	epoch       int64 = 1621481706
 )
 
 type Worker struct {
@@ -21,6 +10,12 @@ type Worker struct {
 	timestamp int64
 	workerId  int64
 	number    int64
+
+	numberBits  int64 // 每秒最大位数
+	numberMax   int64
+	timeShift   int64
+	workerShift int64
+	epoch       int64 // system start use time
 }
 
 func (w *Worker) NextID() int64 {
@@ -31,7 +26,7 @@ func (w *Worker) NextID() int64 {
 	if w.timestamp == now {
 		w.number++
 
-		if w.number > numberMax {
+		if w.number > w.numberMax {
 			for now <= w.timestamp {
 				now = time.Now().UnixNano() / 1e9
 			}
@@ -41,16 +36,31 @@ func (w *Worker) NextID() int64 {
 		w.timestamp = now
 	}
 
-	return (now-epoch)<<timeShift | (w.workerId << workerShift) | (w.number)
+	return (now-w.epoch)<<w.timeShift | (w.workerId << w.workerShift) | (w.number)
 }
 
-func NewWorker(workerId int64) (*Worker, error) {
-	if workerId < 0 || workerId > workerMax {
-		return nil, errors.New("Worker ID excess of quantity ")
-	}
+// NewWorker is Worker Constructor
+// workerBits workerID 位数
+// numberBits 每秒可容纳的ID数量
+// epoch  表示系统开始使用该worker的时间戳
+func NewWorker(workerId, workerBits, numberBits, epoch int64) (*Worker, error) {
+	var (
+		workerMax   int64 = -1 ^ (-1 << workerBits)
+		numberMax   int64 = -1 ^ (-1 << numberBits)
+		timeShift         = workerBits + numberBits
+		workerShift       = numberBits
+	)
+
+	workerId = workerId % workerMax
+
 	return &Worker{
 		timestamp: 0,
 		workerId:  workerId,
 		number:    0,
+
+		numberMax:   numberMax,
+		timeShift:   timeShift,
+		workerShift: workerShift,
+		epoch:       epoch,
 	}, nil
 }
