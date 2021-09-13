@@ -69,7 +69,7 @@ func (f *WorkerIDFactory) WorkID() (int64, error) {
 		}
 	}
 
-	return id % workerMax, tx.Commit()
+	return id, tx.Commit()
 }
 
 func (f *WorkerIDFactory) privateIPv4() (net.IP, error) {

@@ -1,16 +1,16 @@
-package mq
+package beanstalked
 
 import (
 	"context"
 	"github.com/beanstalkd/go-beanstalk"
+	"github.com/zhangliang-zl/reskit/mq"
 	"strconv"
 	"sync"
 	"time"
 )
 
-// Queue service based on beanstalk
-
-type BeanstalkQueue struct {
+// Queue srv based on beanstalk
+type Queue struct {
 	client *beanstalk.Conn
 	tubeStore
 }
@@ -30,13 +30,13 @@ func (store tubeStore) getTube(topic string, client *beanstalk.Conn) *beanstalk.
 	return tube
 }
 
-func (q BeanstalkQueue) Push(ctx context.Context, topic string, body []byte, delay time.Duration) error {
+func (q Queue) Push(ctx context.Context, topic string, body []byte, delay time.Duration) error {
 	t := q.getTube(topic, q.client)
 	_, err := t.Put(body, MinPriority, delay, MaxWorkingTTL)
 	return err
 }
 
-func (q BeanstalkQueue) Fetch(ctx context.Context, topic string, timeout time.Duration) (body []byte, ask Ask, err error) {
+func (q Queue) Fetch(ctx context.Context, topic string, timeout time.Duration) (body []byte, ask mq.Ask, err error) {
 	tube := beanstalk.NewTubeSet(q.client, topic)
 	jobID, body, err := tube.Reserve(timeout)
 	if err != nil {
@@ -49,7 +49,7 @@ func (q BeanstalkQueue) Fetch(ctx context.Context, topic string, timeout time.Du
 
 // The ask function is used to process the execution result of the business
 // The priority of handling failures is reduced until 2048
-func (q BeanstalkQueue) buildAskFunc(ctx context.Context, jobID uint64) Ask {
+func (q Queue) buildAskFunc(ctx context.Context, jobID uint64) mq.Ask {
 	return func(err error) error {
 		if err == nil {
 			return q.client.Delete(jobID)
@@ -74,14 +74,14 @@ func (q BeanstalkQueue) buildAskFunc(ctx context.Context, jobID uint64) Ask {
 	}
 }
 
-func NewBeanstalkQueue(addr string) (Queue, error) {
+func NewBeanstalkQueue(addr string) (mq.Queue, error) {
 	conn, err := beanstalk.Dial("tcp", addr)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return BeanstalkQueue{
+	return Queue{
 		client: conn,
 	}, nil
 }

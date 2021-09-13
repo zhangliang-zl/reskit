@@ -1,23 +1,24 @@
-package mq
+package beanstalked
 
 import (
 	"context"
 	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/zhangliang-zl/reskit/mq"
 	"time"
 )
 
-type BeanstalkSvc struct {
-	queue    Queue
+type Svc struct {
+	queue    mq.Queue
 	topic    string
 	logger   logs.Logger
 	stopChan chan bool
 }
 
-func (svc BeanstalkSvc) Stop() {
+func (svc Svc) Stop() {
 	svc.stopChan <- true
 }
 
-func (svc BeanstalkSvc) Serving(ctx context.Context, consumer Consumer, fetchTimeout time.Duration) {
+func (svc Svc) Serving(ctx context.Context, consumer mq.Consumer, fetchTimeout time.Duration) {
 
 loop:
 	for {
@@ -50,8 +51,8 @@ loop:
 	}
 }
 
-func NewBeanstalkSvc(topic string, queue Queue, logger logs.Logger) Svc {
-	return BeanstalkSvc{
+func NewBeanstalkSvc(topic string, queue mq.Queue, logger logs.Logger) mq.Svc {
+	return Svc{
 		topic:    topic,
 		queue:    queue,
 		logger:   logger,
