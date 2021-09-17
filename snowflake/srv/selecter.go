@@ -1,7 +1,6 @@
 package srv
 
 import (
-	"hash/crc32"
 	"net"
 	"strings"
 	"sync"
@@ -13,14 +12,13 @@ import (
 // All ServerSelector implementations must be safe for concurrent use
 // by multiple goroutines.
 type ServerSelector interface {
-	// PickServer returns the server address that a given item
-	// should be shared onto.
-	PickServer(key string) (net.Addr, error)
+	PickServer() (net.Addr, error)
 	Each(func(net.Addr) error) error
 }
 
 // ServerList is a simple ServerSelector. Its zero value is usable.
 type ServerList struct {
+	seq   uint64
 	mu    sync.RWMutex
 	addrs []net.Addr
 }
@@ -85,18 +83,7 @@ func (ss *ServerList) Each(f func(net.Addr) error) error {
 	return nil
 }
 
-// keyBufPool returns []byte buffers for use by PickServer's call to
-// crc32.ChecksumIEEE to avoid allocations. (but doesn't avoid the
-// copies, which at least are bounded in size and small)
-var keyBufPool = sync.Pool{
-	New: func() interface{} {
-		b := make([]byte, 256)
-		return &b
-	},
-}
-
-
-func (ss *ServerList) PickServer(key string) (net.Addr, error) {
+func (ss *ServerList) PickServer() (net.Addr, error) {
 	ss.mu.RLock()
 	defer ss.mu.RUnlock()
 	if len(ss.addrs) == 0 {
@@ -105,10 +92,8 @@ func (ss *ServerList) PickServer(key string) (net.Addr, error) {
 	if len(ss.addrs) == 1 {
 		return ss.addrs[0], nil
 	}
-	bufp := keyBufPool.Get().(*[]byte)
-	n := copy(*bufp, key)
-	cs := crc32.ChecksumIEEE((*bufp)[:n])
-	keyBufPool.Put(bufp)
 
-	return ss.addrs[cs%uint32(len(ss.addrs))], nil
+	ss.seq++
+
+	return ss.addrs[ss.seq%uint64(len(ss.addrs))], nil
 }

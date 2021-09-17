@@ -40,7 +40,7 @@ var (
 
 const (
 	// DefaultTimeout is the default socket read/write timeout.
-	DefaultTimeout = 100 * time.Millisecond
+	DefaultTimeout = 1000 * time.Millisecond
 
 	// DefaultMaxIdleConns is the default maximum number of idle connections
 	// kept for any single address.
@@ -242,7 +242,7 @@ func (c *Client) getConn(addr net.Addr) (*conn, error) {
 // memcache cache miss. The key must be at most 250 bytes in length.
 func (c *Client) Get(key string) (item *Item, err error) {
 
-	err = c.withKeyAddr(key, func(addr net.Addr) error {
+	err = c.withKeyAddr(func(addr net.Addr) error {
 		return c.getFromAddr(addr, []string{key}, func(it *Item) { item = it })
 	})
 	if err == nil && item == nil {
@@ -252,38 +252,24 @@ func (c *Client) Get(key string) (item *Item, err error) {
 }
 
 func (c *Client) UUID() (string, error) {
+	maxRetry := 10
+	retry := 0
 
-	addr, err := c.selector.PickServer("uuid")
-	if err != nil {
-		return "", err
-	}
+	for {
+		item, err := c.Get("uuid")
+		if err == nil {
+			return string(item.Value), err
+		}
 
-	cn, err := c.getConn(addr)
-	if err != nil {
-		return "", err
-	}
-
-	defer cn.condRelease(&err)
-
-	if _, err = cn.rw.WriteString("get uuid \r\n"); err != nil {
-		return "", err
-	}
-	cn.rw.Flush()
-	var data = make([]byte, 0)
-	data, n, err := cn.rw.ReadLine()
-	fmt.Println(n, string(data), err)
-	/*
-		var item = &Item{}
-		cb := func(it *Item) { item = it }
-		if err := parseGetResponse(rw.Reader, cb); err != nil {
+		retry++
+		if retry >= maxRetry {
 			return "", err
 		}
-		fmt.Println(item)*/
-	return "", nil
+	}
 }
 
-func (c *Client) withKeyAddr(key string, fn func(net.Addr) error) (err error) {
-	addr, err := c.selector.PickServer(key)
+func (c *Client) withKeyAddr(fn func(net.Addr) error) (err error) {
+	addr, err := c.selector.PickServer()
 	if err != nil {
 		return err
 	}
@@ -365,7 +351,6 @@ func parseGetResponse(r *bufio.Reader, cb func(*Item)) error {
 			return fmt.Errorf("memcache: corrupt get result read")
 		}
 		it.Value = it.Value[:size]
-		fmt.Println(it)
 		cb(it)
 	}
 }
