@@ -1,4 +1,4 @@
-package protocols
+package srv
 
 import (
 	"hash/crc32"
@@ -95,6 +95,9 @@ var keyBufPool = sync.Pool{
 	},
 }
 
+
+// TODO  handler
+// PickServer return random
 func (ss *ServerList) PickServer(key string) (net.Addr, error) {
 	ss.mu.RLock()
 	defer ss.mu.RUnlock()
@@ -111,4 +114,3 @@ func (ss *ServerList) PickServer(key string) (net.Addr, error) {
 
 	return ss.addrs[cs%uint32(len(ss.addrs))], nil
 }
-
