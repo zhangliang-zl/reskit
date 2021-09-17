@@ -37,7 +37,6 @@ func (app *Application) Init(options Options) error {
 }
 
 func (app *Application) Run() error {
-
 	if err := app.savePID(app.pid); err != nil {
 		return err
 	}
@@ -69,7 +68,7 @@ func (app *Application) Close() error {
 
 func (app *Application) savePID(file string) error {
 	if file == "" {
-		file = app.prjName + ".pid"
+		return nil
 	}
 
 	f, err := os.OpenFile(file, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0766)
