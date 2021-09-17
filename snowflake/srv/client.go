@@ -47,8 +47,6 @@ const (
 	DefaultMaxIdleConns = 2
 )
 
-const buffered = 8 // arbitrary buffered channel size, for readability
-
 // resumableError returns true if err is only a protocol-level cache error.
 // This is used to determine whether or not a server connection should
 // be re-used or not. If an error occurs, by default we don't reuse the
@@ -61,18 +59,6 @@ func resumableError(err error) bool {
 	return false
 }
 
-func legalKey(key string) bool {
-	if len(key) > 250 {
-		return false
-	}
-	for i := 0; i < len(key); i++ {
-		if key[i] <= ' ' || key[i] == 0x7f {
-			return false
-		}
-	}
-	return true
-}
-
 var (
 	crlf          = []byte("\r\n")
 	space         = []byte(" ")
@@ -83,7 +69,7 @@ var (
 // New returns a memcache client using the provided server(s)
 // with equal weight. If a server is listed multiple times,
 // it gets a proportional amount of weight.
-func New(server ...string) *Client {
+func NewClient(server ...string) *Client {
 	ss := new(ServerList)
 	ss.SetServers(server...)
 	return NewFromSelector(ss)
@@ -220,11 +206,6 @@ func (cte *ConnectTimeoutError) Error() string {
 }
 
 func (c *Client) dial(addr net.Addr) (net.Conn, error) {
-	type connError struct {
-		cn  net.Conn
-		err error
-	}
-
 	nc, err := net.DialTimeout(addr.Network(), addr.String(), c.netTimeout())
 	if err == nil {
 		return nc, nil
@@ -260,6 +241,7 @@ func (c *Client) getConn(addr net.Addr) (*conn, error) {
 // Get gets the item for the given key. ErrCacheMiss is returned for a
 // memcache cache miss. The key must be at most 250 bytes in length.
 func (c *Client) Get(key string) (item *Item, err error) {
+
 	err = c.withKeyAddr(key, func(addr net.Addr) error {
 		return c.getFromAddr(addr, []string{key}, func(it *Item) { item = it })
 	})
@@ -269,10 +251,38 @@ func (c *Client) Get(key string) (item *Item, err error) {
 	return
 }
 
-func (c *Client) withKeyAddr(key string, fn func(net.Addr) error) (err error) {
-	if !legalKey(key) {
-		return ErrMalformedKey
+func (c *Client) UUID() (string, error) {
+
+	addr, err := c.selector.PickServer("uuid")
+	if err != nil {
+		return "", err
 	}
+
+	cn, err := c.getConn(addr)
+	if err != nil {
+		return "", err
+	}
+
+	defer cn.condRelease(&err)
+
+	if _, err = cn.rw.WriteString("get uuid \r\n"); err != nil {
+		return "", err
+	}
+	cn.rw.Flush()
+	var data = make([]byte, 0)
+	data, n, err := cn.rw.ReadLine()
+	fmt.Println(n, string(data), err)
+	/*
+		var item = &Item{}
+		cb := func(it *Item) { item = it }
+		if err := parseGetResponse(rw.Reader, cb); err != nil {
+			return "", err
+		}
+		fmt.Println(item)*/
+	return "", nil
+}
+
+func (c *Client) withKeyAddr(key string, fn func(net.Addr) error) (err error) {
 	addr, err := c.selector.PickServer(key)
 	if err != nil {
 		return err
@@ -291,7 +301,7 @@ func (c *Client) withAddrRw(addr net.Addr, fn func(*bufio.ReadWriter) error) (er
 
 func (c *Client) getFromAddr(addr net.Addr, keys []string, cb func(*Item)) error {
 	return c.withAddrRw(addr, func(rw *bufio.ReadWriter) error {
-		if _, err := fmt.Fprintf(rw, "gets %s\r\n", strings.Join(keys, " ")); err != nil {
+		if _, err := fmt.Fprintf(rw, "get %s\r\n", strings.Join(keys, " ")); err != nil {
 			return err
 		}
 		if err := rw.Flush(); err != nil {
@@ -355,6 +365,7 @@ func parseGetResponse(r *bufio.Reader, cb func(*Item)) error {
 			return fmt.Errorf("memcache: corrupt get result read")
 		}
 		it.Value = it.Value[:size]
+		fmt.Println(it)
 		cb(it)
 	}
 }

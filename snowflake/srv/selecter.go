@@ -96,8 +96,6 @@ var keyBufPool = sync.Pool{
 }
 
 
-// TODO  handler
-// PickServer return random
 func (ss *ServerList) PickServer(key string) (net.Addr, error) {
 	ss.mu.RLock()
 	defer ss.mu.RUnlock()
