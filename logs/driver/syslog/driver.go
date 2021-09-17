@@ -13,10 +13,15 @@ func (r writer) Record(m string) {
 	r.w.Info(m)
 }
 
-func Driver(projectName string) driver.WriterBuild {
+const defaultPriority = syslog.LOG_DEBUG | syslog.LOG_LOCAL6
+
+func Driver(projectName string, priority syslog.Priority) driver.WriterBuild {
 	return func(tag string) (driver.Writer, error) {
 		tag = projectName + "/" + tag
-		sysWriter, err := syslog.New(syslog.LOG_DEBUG|syslog.LOG_LOCAL6, tag)
+		if priority == 0 {
+			priority = defaultPriority
+		}
+		sysWriter, err := syslog.New(priority, tag)
 		if err != nil {
 			return writer{}, err
 		}
