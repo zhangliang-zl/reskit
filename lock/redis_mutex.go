@@ -142,12 +142,12 @@ func (m *RedisMutex) UnLock(ctx context.Context) {
 	return
 }
 
-type RedisMutexFactory struct {
+type redisMutexFactory struct {
 	redisClient *redis.Client
 	logger      logs.Logger
 }
 
-func (factory RedisMutexFactory) New(opts Options) Mutex {
+func (factory redisMutexFactory) New(opts Options) Mutex {
 	if opts.LockWaiting == 0 {
 		opts.LockWaiting = DefaultLockWaiting
 	}
@@ -174,8 +174,8 @@ func (factory RedisMutexFactory) New(opts Options) Mutex {
 	}
 }
 
-func NewFactoryForRedis(logger logs.Logger, redisClient *redis.Client) Factory {
-	return RedisMutexFactory{
+func NewRedisMutexFactory(logger logs.Logger, redisClient *redis.Client) Factory {
+	return redisMutexFactory{
 		logger:      logger,
 		redisClient: redisClient,
 	}

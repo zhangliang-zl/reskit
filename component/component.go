@@ -8,15 +8,6 @@ type Interface interface {
 	Instance() interface{}
 }
 
-const DefaultID = "default"
-
 func BuildKey(cType string, id string) string {
-	var trueID string
-	if id == "" {
-		trueID = DefaultID
-	} else {
-		trueID = id
-	}
-
-	return fmt.Sprintf("%s%s", trueID, cType)
+	return fmt.Sprintf("%s%s", id, cType)
 }

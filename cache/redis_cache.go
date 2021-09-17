@@ -149,10 +149,14 @@ func (*RedisCache) buildKey(key string) string {
 	return redisKeyPrefix + md5Key
 }
 
-func NewCacheForRedis(client *redis.Client, logger logs.Logger) Cache {
+func NewRedisCache(client *redis.Client, logger logs.Logger, prefix string) Cache {
+	if prefix == "" {
+		prefix = redisKeyPrefix
+	}
+
 	return &RedisCache{
 		client:      client,
 		logger:      logger,
-		lockFactory: lock.NewFactoryForRedis(logger, client),
+		lockFactory: lock.NewRedisMutexFactory(logger, client),
 	}
 }

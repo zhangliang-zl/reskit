@@ -22,7 +22,7 @@ func init() {
 	}, redisLogger)
 
 	mutexLogger, _ := loggerFactory.Get("mutex")
-	factory = NewFactoryForRedis(mutexLogger, kvStore)
+	factory = NewRedisMutexFactory(mutexLogger, kvStore)
 }
 
 func TestRedisMutex(t *testing.T) {

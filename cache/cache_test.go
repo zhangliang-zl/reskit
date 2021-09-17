@@ -22,9 +22,10 @@ func init() {
 		DB:       0,
 	}, redisLogger)
 
-	redisCache = NewCacheForRedis(
+	redisCache = NewRedisCache(
 		kvStore,
 		cacheLogger,
+		"Caching:",
 	)
 
 	memoryCache = NewMemoryCache(0)
