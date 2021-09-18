@@ -1,4 +1,4 @@
-package srv
+package service
 
 import (
 	"bufio"
@@ -13,21 +13,19 @@ import (
 	"time"
 )
 
-// Similar to:
-
 var (
 	// ErrCacheMiss means that a Get failed because the item wasn't present.
-	ErrCacheMiss = errors.New("memcache: cache miss")
+	ErrCacheMiss = errors.New(" cache miss")
 
 	// ErrCASConflict means that a CompareAndSwap call failed due to the
 	// cached value being modified between the Get and the CompareAndSwap.
 	// If the cached value was simply evicted rather than replaced,
 	// ErrNotStored will be returned instead.
-	ErrCASConflict = errors.New("memcache: compare-and-swap conflict")
+	ErrCASConflict = errors.New(" compare-and-swap conflict")
 
 	// ErrNotStored means that a conditional write operation (i.e. Add or
 	// CompareAndSwap) failed because the condition was not satisfied.
-	ErrNotStored = errors.New("memcache: item not stored")
+	ErrNotStored = errors.New(" item not stored")
 
 	// ErrMalformedKey is returned when an invalid key is used.
 	// Keys must be at maximum 250 bytes long and not
@@ -35,7 +33,7 @@ var (
 	ErrMalformedKey = errors.New("malformed: key is too long or contains invalid characters")
 
 	// ErrNoServers is returned when no servers are configured or available.
-	ErrNoServers = errors.New("memcache: no servers configured or available")
+	ErrNoServers = errors.New(" no servers configured or available")
 )
 
 const (
@@ -202,7 +200,7 @@ type ConnectTimeoutError struct {
 }
 
 func (cte *ConnectTimeoutError) Error() string {
-	return "memcache: connect timeout to " + cte.Addr.String()
+	return " connect timeout to " + cte.Addr.String()
 }
 
 func (c *Client) dial(addr net.Addr) (net.Conn, error) {
@@ -252,7 +250,7 @@ func (c *Client) Get(key string) (item *Item, err error) {
 }
 
 func (c *Client) UUID() (string, error) {
-	maxRetry := 10
+	maxRetry :=2
 	retry := 0
 
 	for {
@@ -318,7 +316,7 @@ func (c *Client) ping(addr net.Addr) error {
 		case bytes.HasPrefix(line, versionPrefix):
 			break
 		default:
-			return fmt.Errorf("memcache: unexpected response line from ping: %q", string(line))
+			return fmt.Errorf(" unexpected response line from ping: %q", string(line))
 		}
 		return nil
 	})
@@ -348,7 +346,7 @@ func parseGetResponse(r *bufio.Reader, cb func(*Item)) error {
 		}
 		if !bytes.HasSuffix(it.Value, crlf) {
 			it.Value = nil
-			return fmt.Errorf("memcache: corrupt get result read")
+			return fmt.Errorf(" corrupt get result read")
 		}
 		it.Value = it.Value[:size]
 		cb(it)
@@ -366,7 +364,7 @@ func scanGetResponseLine(line []byte, it *Item) (size int, err error) {
 	}
 	n, err := fmt.Sscanf(string(line), pattern, dest...)
 	if err != nil || n != len(dest) {
-		return -1, fmt.Errorf("memcache: unexpected line in get response: %q", line)
+		return -1, fmt.Errorf(" unexpected line in get response: %q", line)
 	}
 	return size, nil
 }

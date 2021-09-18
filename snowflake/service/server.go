@@ -1,4 +1,4 @@
-package srv
+package service
 
 import (
 	"context"
@@ -18,19 +18,14 @@ type Server struct {
 
 type ServerOptions struct {
 	Port       int // 推荐 5101
-	MysqlDsn   string
+	WorkerID   int64
 	WorkerBits int64 // 推荐 4~5
 	NumberBits int64 // 推荐18
 	Epoch      int64 // 推荐系统开始使用时开始
 }
 
 func NewServer(opts ServerOptions, logger logs.Logger) (*Server, error) {
-	workerFactory := snowflake.NewWorkerIDFactory(opts.MysqlDsn)
-	workerID, err := workerFactory.WorkID()
-	if err != nil {
-		return nil, err
-	}
-
+	workerID := opts.WorkerID
 	idWorker, err := snowflake.NewWorker(workerID, opts.WorkerBits, opts.NumberBits, opts.Epoch)
 	if err != nil {
 		return nil, err
@@ -75,10 +70,10 @@ func (s *Server) handle(conn net.Conn) error {
 	defer conn.Close()
 	request := make([]byte, 128)
 	ctx := logs.WithTraceID(context.Background())
+loop:
 	for {
 		readLen, err := conn.Read(request)
 		if err != nil {
-			s.logger.Error(ctx, "Read Error :%s", err.Error())
 			continue
 		}
 
@@ -86,15 +81,21 @@ func (s *Server) handle(conn net.Conn) error {
 		if readLen == 0 {
 			s.logger.Error(ctx, "ReadLen is 0 , client disconnect automatically")
 			break
-		} else if instruction == "uuid\r\n" {
+		}
+
+		switch instruction {
+		case "get uuid\r\n":
 			uuid := s.idWorker.NextID()
-			uuidStr := strconv.FormatInt(uuid, 10) + "\r\n"
-			conn.Write([]byte(uuidStr))
-			s.logger.Debug(ctx, "nextID is "+uuidStr)
-		} else if instruction == "quit\r\n" {
+			uuidStr := strconv.FormatInt(uuid, 10)
+			respInfo := fmt.Sprintf("VALUE uuid 0 %d\r\n%s\r\nEND\r\n", len(uuidStr), uuidStr)
+			conn.Write([]byte(respInfo))
+			s.logger.Debug(ctx, "nextID is %d", uuid)
+
+		case "quit\r\n":
 			s.logger.Debug(ctx, "client is quit")
-			break
-		} else {
+			break loop
+
+		default:
 			s.logger.Warn(ctx, "unknown instructions")
 		}
 		request = make([]byte, 128)

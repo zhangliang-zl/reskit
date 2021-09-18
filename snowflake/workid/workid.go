@@ -1,4 +1,4 @@
-package snowflake
+package workid
 
 import (
 	"database/sql"
@@ -16,11 +16,11 @@ var (
 		") ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4"
 )
 
-type WorkerIDFactory struct {
+type Factory struct {
 	mysqlDsn string
 }
 
-func (f *WorkerIDFactory) WorkID() (int64, error) {
+func (f *Factory) Get() (int64, error) {
 
 	if f.mysqlDsn == "" {
 		return 0, errors.New("mysql dsn is nil")
@@ -72,7 +72,7 @@ func (f *WorkerIDFactory) WorkID() (int64, error) {
 	return id, tx.Commit()
 }
 
-func (f *WorkerIDFactory) privateIPv4() (net.IP, error) {
+func (f *Factory) privateIPv4() (net.IP, error) {
 	as, err := net.InterfaceAddrs()
 	if err != nil {
 		return nil, err
@@ -92,13 +92,13 @@ func (f *WorkerIDFactory) privateIPv4() (net.IP, error) {
 	return nil, errors.New("no private ip address")
 }
 
-func (f *WorkerIDFactory) isPrivateIPv4(ip net.IP) bool {
+func (f *Factory) isPrivateIPv4(ip net.IP) bool {
 	return ip != nil &&
 		(ip[0] == 10 || ip[0] == 172 && (ip[1] >= 16 && ip[1] < 32) || ip[0] == 192 && ip[1] == 168)
 }
 
-func NewWorkerIDFactory(dsn string) *WorkerIDFactory {
-	return &WorkerIDFactory{
+func NewFactory(dsn string) *Factory {
+	return &Factory{
 		mysqlDsn: dsn,
 	}
 }
