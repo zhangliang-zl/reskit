@@ -8,7 +8,7 @@ import (
 )
 
 func startServer(opts ServerOptions) error {
-	loggerFac := logs.NewFactory(logs.LevelDebug, stdout.Driver())
+	loggerFac := logs.NewFactory(logs.LevelWarn, stdout.Driver())
 	logger, _ := loggerFac.Get("uuid")
 	ser, err := NewServer(opts, logger)
 	if err != nil {

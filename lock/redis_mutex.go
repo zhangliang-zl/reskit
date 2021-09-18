@@ -11,6 +11,17 @@ import (
 	"time"
 )
 
+const (
+	DefaultKeyPrefix     = "MutexLocker:"
+	DefaultRetryInterval = 50 * time.Millisecond
+	DefaultMaxRenewTimes = 30
+	DefaultLocked        = 10 * time.Second
+	DefaultLockWaiting   = 30 * time.Second
+
+	RenewClose   = -2
+	RenewForever = -1
+)
+
 type RedisMutex struct {
 	redisClient *redis.Client
 	logger      logs.Logger
@@ -145,6 +156,7 @@ func (m *RedisMutex) UnLock(ctx context.Context) {
 type redisMutexFactory struct {
 	redisClient *redis.Client
 	logger      logs.Logger
+	keyPrefix   string
 }
 
 func (factory redisMutexFactory) New(opts Options) Mutex {
@@ -164,7 +176,7 @@ func (factory redisMutexFactory) New(opts Options) Mutex {
 		opts.RetryInterval = DefaultRetryInterval
 	}
 
-	opts.Key = buildKey(opts.Key)
+	opts.Key = factory.keyPrefix + opts.Key
 
 	return &RedisMutex{
 		redisClient: factory.redisClient,
@@ -174,15 +186,16 @@ func (factory redisMutexFactory) New(opts Options) Mutex {
 	}
 }
 
-func NewRedisMutexFactory(logger logs.Logger, redisClient *redis.Client) Factory {
+func NewRedisMutexFactory(logger logs.Logger, redisClient *redis.Client, keyPrefix string) Factory {
+	if keyPrefix == "" {
+		keyPrefix = DefaultKeyPrefix
+	}
+	
 	return redisMutexFactory{
 		logger:      logger,
 		redisClient: redisClient,
+		keyPrefix:   keyPrefix,
 	}
-}
-
-func buildKey(key string) string {
-	return KeyPrefix + key
 }
 
 func uniqueID() string {

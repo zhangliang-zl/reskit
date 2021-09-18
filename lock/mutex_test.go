@@ -13,16 +13,16 @@ import (
 var factory Factory
 
 func init() {
-	loggerFactory := logs.NewFactory(logs.LevelInfo, stdout.Driver())
+	loggerFactory := logs.NewFactory(logs.LevelWarn, stdout.Driver())
 	redisLogger, _ := loggerFactory.Get("redis")
 	kvStore, _ := redis.New(redis.Options{
 		Addr:     "localhost:6379",
-		Password: "Password",
+		Password: "",
 		DB:       0,
 	}, redisLogger)
 
 	mutexLogger, _ := loggerFactory.Get("mutex")
-	factory = NewRedisMutexFactory(mutexLogger, kvStore)
+	factory = NewRedisMutexFactory(mutexLogger, kvStore, "")
 }
 
 func TestRedisMutex(t *testing.T) {

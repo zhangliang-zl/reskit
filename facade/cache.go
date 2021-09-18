@@ -9,7 +9,7 @@ import (
 
 func RegisterRedisCache(id string, kvstroe *redis.Client) error {
 	logger := Logger(compCache)
-	instance := component.Make(cache.NewCacheForRedis(kvstroe, logger), nil, nil)
+	instance := component.Make(cache.NewRedisCache(kvstroe, logger, ""), nil, nil)
 	return reskit.App().SetComponent(compCache, id, instance)
 }
 

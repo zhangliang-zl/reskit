@@ -9,7 +9,7 @@ import (
 
 func RegisterMutexFactory(id string, kvstroe *redis.Client) error {
 	logger := Logger(compMutex)
-	factory := lock.NewRedisMutexFactory(logger, kvstroe)
+	factory := lock.NewRedisMutexFactory(logger, kvstroe, "")
 	instance := component.Make(factory, nil, nil)
 	return reskit.App().SetComponent(compMutex, id, instance)
 }

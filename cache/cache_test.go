@@ -18,7 +18,7 @@ func init() {
 	cacheLogger, _ := loggerFactory.Get("cache")
 	kvStore, _ := redis.New(redis.Options{
 		Addr:     "localhost:6379",
-		Password: "Password",
+		Password: "",
 		DB:       0,
 	}, redisLogger)
 

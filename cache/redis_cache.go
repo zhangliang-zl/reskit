@@ -157,6 +157,6 @@ func NewRedisCache(client *redis.Client, logger logs.Logger, prefix string) Cach
 	return &RedisCache{
 		client:      client,
 		logger:      logger,
-		lockFactory: lock.NewRedisMutexFactory(logger, client),
+		lockFactory: lock.NewRedisMutexFactory(logger, client, ""),
 	}
 }

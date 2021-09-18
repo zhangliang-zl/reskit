@@ -8,7 +8,7 @@ import (
 func Logger(tag string) logs.Logger {
 	l, err := application.Logger(tag)
 	if err != nil {
-		l = logs.EmptyLogger{}
+		panic(err)
 	}
 	return l
 }

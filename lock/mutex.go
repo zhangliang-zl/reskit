@@ -23,13 +23,5 @@ type Options struct {
 	RenewTimes    int           // default 30 times ; -1  forever ; -2 close
 }
 
-const KeyPrefix = "MutexLocker:"
-const DefaultRetryInterval = 50 * time.Millisecond
-const DefaultMaxRenewTimes = 30
-const DefaultLocked = 10 * time.Second
-const DefaultLockWaiting = 30 * time.Second
-
-const RenewClose = -2
-const RenewForever = -1
 
 var ErrLockOvertime = errors.New("Locking failed , timeout ")
