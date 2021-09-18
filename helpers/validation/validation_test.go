@@ -28,8 +28,8 @@ func TestValidatorStruct(t *testing.T) {
 
 func TestValidatorVar(t *testing.T) {
 	v := New(LangEN)
-	result := v.Var("123", "email")
-	if !result.HasError() {
-		t.Error("var error")
+	result := v.Var("123@qq.com", "email")
+	if result.HasError() {
+		t.Error(result.FirstError())
 	}
 }

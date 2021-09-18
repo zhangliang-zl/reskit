@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// beanstalkQueue beanstalkService based on beanstalk
+// beanstalkQueue based on beanstalk
 type beanstalkQueue struct {
 	client *beanstalk.Conn
 	tubeStore

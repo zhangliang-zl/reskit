@@ -48,7 +48,7 @@ func (app *Application) Run() error {
 		return err
 	}
 
-	// Waiting close signal ..
+	// Waiting close signal.
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	<-signalChan
