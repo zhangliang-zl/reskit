@@ -7,15 +7,14 @@ import (
 	"fmt"
 	"github.com/zhangliang-zl/reskit/logs"
 	"github.com/zhangliang-zl/reskit/logs/driver/stdout"
-	 "github.com/zhangliang-zl/reskit/mq/driver/beanstalked"
 	"math/rand"
 	"sync"
 	"testing"
 	"time"
 )
 
-var q, _ = beanstalked.NewQueue("localhost11304")
-var loggerFactory = logs.NewFactory(logs.LevelInfo, stdout.Driver())
+var q, _ = NewBeanstalkQueue("localhost:11300")
+var loggerFactory = logs.NewFactory(logs.LevelWarn, stdout.Driver())
 var logger, _ = loggerFactory.Get("mq")
 var runTimes = 0
 
@@ -50,17 +49,17 @@ func TestQueueSvc(t *testing.T) {
 	wg := sync.WaitGroup{}
 	c := &testConsumer{}
 
-	qSvc := NewSvc(topic, q, logger)
+	qSvc := NewBeanstalkService(logger)
 	wg.Add(1)
 	go func() {
-		qSvc.Serving(ctx, c, time.Second*3)
+		qSvc.Serving(ctx, topic, q, c, time.Second*3)
 		wg.Done()
 	}()
 
 	for i := 0; i < 50; i++ {
 		in := Raw{
 			Id:   i,
-			Name: "svcImpl",
+			Name: "beanstalkService",
 			Data: "data_svc",
 		}
 		data, _ := json.Marshal(in)
