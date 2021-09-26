@@ -46,7 +46,7 @@ const (
 )
 
 // resumableError returns true if err is only a protocol-level cache error.
-// This is used to determine whether or not a server connection should
+// This is used to determine whether or not a grpcx connection should
 // be re-used or not. If an error occurs, by default we don't reuse the
 // connection, unless it was just a cache error.
 func resumableError(err error) bool {
@@ -64,8 +64,8 @@ var (
 	versionPrefix = []byte("VERSION")
 )
 
-// New returns a memcache client using the provided server(s)
-// with equal weight. If a server is listed multiple times,
+// New returns a memcache client using the provided grpcx(s)
+// with equal weight. If a grpcx is listed multiple times,
 // it gets a proportional amount of weight.
 func NewClient(server ...string) *Client {
 	ss := new(ServerList)
@@ -99,7 +99,7 @@ type Client struct {
 	freeconn map[string][]*conn
 }
 
-// Item is an item to be got or stored in a memcached server.
+// Item is an item to be got or stored in a memcached grpcx.
 type Item struct {
 	// Key is the Item's key (250 bytes maximum).
 	Key string
@@ -107,7 +107,7 @@ type Item struct {
 	// Value is the Item's value.
 	Value []byte
 
-	// Flags are server-opaque flags whose semantics are entirely
+	// Flags are grpcx-opaque flags whose semantics are entirely
 	// up to the app.
 	Flags uint32
 
@@ -120,7 +120,7 @@ type Item struct {
 	casid uint64
 }
 
-// conn is a connection to a server.
+// conn is a connection to a grpcx.
 type conn struct {
 	nc   net.Conn
 	rw   *bufio.ReadWriter

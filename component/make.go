@@ -1,12 +1,12 @@
 package component
 
-type build struct {
+type componentIns struct {
 	run   func() error
 	close func() error
 	obj   interface{}
 }
 
-func (d *build) Run() error {
+func (d *componentIns) Run() error {
 	if d.run == nil {
 		return nil
 	}
@@ -14,7 +14,7 @@ func (d *build) Run() error {
 	return d.run()
 }
 
-func (d *build) Close() error {
+func (d *componentIns) Close() error {
 	if d.close == nil {
 		return nil
 	}
@@ -22,12 +22,12 @@ func (d *build) Close() error {
 	return d.close()
 }
 
-func (d *build) Instance() interface{} {
+func (d *componentIns) Instance() interface{} {
 	return d.obj
 }
 
 func Make(obj interface{}, run, close func() error) Interface {
-	return &build{
+	return &componentIns{
 		obj:   obj,
 		run:   run,
 		close: close,
