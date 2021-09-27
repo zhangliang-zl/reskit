@@ -1,5 +1,8 @@
 package application
 
+import "github.com/zhangliang-zl/reskit/logs"
+
 type Options struct {
-	Env, LogLevel, PrjName, PID string
+	Env, PrjName, PID string
+	LogLevel          logs.Level
 }

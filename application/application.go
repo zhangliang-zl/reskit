@@ -13,7 +13,7 @@ import (
 type Application struct {
 	env      string
 	pid      string // Save pid to this file
-	logLevel string
+	logLevel logs.Level
 	prjName  string
 
 	components component.Container
@@ -94,7 +94,7 @@ func (app *Application) Env() string {
 	return app.env
 }
 
-func (app *Application) LoggerLevel() string {
+func (app *Application) LoggerLevel() logs.Level {
 	return app.logLevel
 }
 
