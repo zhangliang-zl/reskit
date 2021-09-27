@@ -1,5 +1,7 @@
+### TODO
 
-// todo 完成基于 consul的 测试
-// 考虑健康检测
-// 服务端的middlewares or warp ?
-// 客户端的middlewares or warp  ?
+grpcx
+- 服务端的middlewares or warp
+- 客户端的middlewares or warp
+- tracing 集成
+- limit 熔断器？
