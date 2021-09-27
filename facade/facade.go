@@ -8,6 +8,7 @@ const (
 
 const (
 	compDb     = "_db"
+	compGrpc   = "_grpc"
 	compRedis  = "_redis"
 	compServer = "_server"
 	compMutex  = "_mutex"
