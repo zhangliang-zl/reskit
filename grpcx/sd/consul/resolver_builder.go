@@ -9,9 +9,8 @@ import (
 )
 
 var (
-	errMissingAddr  = errors.New("consul resolver: missing address")
-	errAddrMisMatch = errors.New("consul resolver: invalied uri")
-	regexConsul, _  = regexp.Compile("^([A-z0-9.]+)(:[0-9]{1,5})?/([A-z_]+)$")
+	errMissingAddr = errors.New("consul resolver: missing address")
+	regexConsul, _ = regexp.Compile("^([A-z0-9.]+)(:[0-9]{1,5})?/([A-z0-9_]+)$")
 )
 
 type resolverBuilder struct {
@@ -40,10 +39,6 @@ func (b *resolverBuilder) parseTarget(target string) (host, port, name string, e
 
 	if target == "" {
 		return "", "", "", errMissingAddr
-	}
-
-	if !regexConsul.MatchString(target) {
-		return "", "", "", errAddrMisMatch
 	}
 
 	groups := regexConsul.FindStringSubmatch(target)
@@ -81,6 +76,7 @@ func (r *resolverImpl) watcher() error {
 		services, meta, err := client.Health().Service(r.name, r.name, true, &api.QueryOptions{WaitIndex: r.lastIndex})
 		if err != nil {
 			fmt.Printf("error retrieving instances from Consul: %v\n", err)
+			return err
 		}
 
 		r.lastIndex = meta.LastIndex
@@ -91,7 +87,6 @@ func (r *resolverImpl) watcher() error {
 		}
 		state := resolver.State{
 			Addresses:     addresses,
-			ServiceConfig: r.cc.ParseServiceConfig(r.name),
 		}
 		r.cc.UpdateState(state)
 	}

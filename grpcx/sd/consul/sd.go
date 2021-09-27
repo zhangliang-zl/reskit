@@ -7,12 +7,12 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-type discovery struct {
+type serviceDiscovery struct {
 	ca string
 }
 
-func (d *discovery) Register(svc sd.Service) error {
-	agent, err := getAgent(d.ca)
+func (sd *serviceDiscovery) Register(svc sd.Service) error {
+	agent, err := getAgent(sd.ca)
 	if err != nil {
 		return err
 	}
@@ -35,8 +35,8 @@ func (d *discovery) Register(svc sd.Service) error {
 	return agent.ServiceRegister(reg)
 }
 
-func (d *discovery) DeRegister(svc sd.Service) error {
-	agent, err := getAgent(d.ca)
+func (sd *serviceDiscovery) DeRegister(svc sd.Service) error {
+	agent, err := getAgent(sd.ca)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (d *discovery) DeRegister(svc sd.Service) error {
 	return agent.ServiceDeregister(id)
 }
 
-func (*discovery) ResolverBuilder() resolver.Builder {
+func (*serviceDiscovery) ResolverBuilder() resolver.Builder {
 	return &resolverBuilder{}
 }
 
@@ -64,7 +64,7 @@ func buildID(svc sd.Service) string {
 }
 
 func New(address string) sd.ServiceDiscovery {
-	return &discovery{
+	return &serviceDiscovery{
 		ca: address,
 	}
 }
