@@ -27,7 +27,7 @@ func (sd *serviceDiscovery) Register(svc sd.Service) error {
 		Address: svc.IP,
 		Check: &api.AgentServiceCheck{
 			Interval:                       svc.HealthCheckInterval.String(),
-			GRPC:                           fmt.Sprintf("%v:%v/%v", svc.IP, svc.Port, svc.Name), //grpc 支持，执行健康检查的地址，svc 会传到 Health.Check 函数中
+			GRPC:                           fmt.Sprintf("%v:%v/%v", svc.IP, svc.Port, svc.Name), //grpcx 支持，执行健康检查的地址，svc 会传到 Health.Check 函数中
 			DeregisterCriticalServiceAfter: deregister.String(),                                 // 注销时间，相当于过期时间
 		},
 	}

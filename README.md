@@ -1,7 +1,5 @@
 ### TODO
 
-grpcx
-- 服务端的middlewares or warp
-- 客户端的middlewares or warp
-- tracing 集成
-- limit 熔断器？
+- application 支持 sd 
+- 公用 middlewares 支持
+- grpc middlewares 支持

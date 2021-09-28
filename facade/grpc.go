@@ -1,25 +1,31 @@
 package facade
 
 import (
-	"github.com/zhangliang-zl/reskit"
-	"github.com/zhangliang-zl/reskit/component"
+	"github.com/zhangliang-zl/reskit/app"
 	"github.com/zhangliang-zl/reskit/grpcx"
 	"google.golang.org/grpc"
 )
 
 func RegisterGrpcServer(opts grpcx.ServerOptions, id string, rpcServer *grpc.Server) error {
-	logger := Logger(compGrpc)
+	id = buildID(serviceGrpc, id)
+	logger, err := Logger(serviceGrpc)
+	if err != nil {
+		return err
+	}
+
 	engine := grpcx.NewServer(opts, rpcServer, logger)
-	instance := component.Make(engine, engine.Run, engine.Close)
-	return reskit.App().SetComponent(compGrpc, id, instance)
+	instance := app.MakeService(engine, engine.Start, engine.Stop)
+	App().RegisterService(instance, id)
+	return nil
 }
 
 func GrpcServer(id string) *grpcx.Server {
-	res, ok := reskit.App().Component(compGrpc, id)
+	id = buildID(serviceGrpc, id)
+	res, ok := App().Service(id)
 
 	if !ok {
-		panic(compGrpc + noRegister)
+		panic(serviceGrpc + noRegister)
 	}
 
-	return res.(*grpcx.Server)
+	return res.Object().(*grpcx.Server)
 }

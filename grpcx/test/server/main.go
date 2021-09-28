@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/zhangliang-zl/reskit"
-	"github.com/zhangliang-zl/reskit/application"
+	"github.com/zhangliang-zl/reskit/app"
 	"github.com/zhangliang-zl/reskit/facade"
 	"github.com/zhangliang-zl/reskit/grpcx"
 	"github.com/zhangliang-zl/reskit/grpcx/sd"
@@ -22,10 +22,10 @@ func (s *helloServer) SayHello(_ context.Context, in *pb.HelloRequest) (*pb.Hell
 }
 
 func main() {
-	app, err := reskit.Init(application.Options{
+	app, err := reskit.Init(app.Options{
 		Env:      "dev",
 		LogLevel: logs.LevelDebug,
-		PrjName:  "hero",
+		Name:     "hero",
 	})
 	if err != nil {
 		log.Fatal(app.Run())

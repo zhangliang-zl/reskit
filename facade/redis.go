@@ -2,26 +2,33 @@ package facade
 
 import (
 	"github.com/go-redis/redis/v8"
-	"github.com/zhangliang-zl/reskit"
-	"github.com/zhangliang-zl/reskit/component"
+	"github.com/zhangliang-zl/reskit/app"
 	kvstore "github.com/zhangliang-zl/reskit/redis"
 )
 
 func RegisterRedis(opts kvstore.Options, id string) error {
-	logger := Logger(compRedis)
-	client, err := kvstore.New(opts, logger)
+	id = buildID(compRedis, id)
+	logger, err := Logger(compRedis)
 	if err != nil {
 		return err
 	}
 
-	instance := component.Make(client, nil, client.Close)
-	return reskit.App().SetComponent(compRedis, id, instance)
+	instance, err := kvstore.New(opts, logger)
+	if err != nil {
+		return err
+	}
+
+	comp := app.MakeComponent(instance, instance.Close)
+	appInstance.RegisterComponent(comp, id)
+
+	return nil
 }
 
 func Redis(id string) *redis.Client {
-	res, ok := reskit.App().Component(compRedis, id)
+	id = buildID(compRedis, id)
+	res, ok := App().Component(id)
 	if !ok {
 		panic(compRedis + noRegister)
 	}
-	return res.(*redis.Client)
+	return res.Object().(*redis.Client)
 }

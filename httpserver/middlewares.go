@@ -12,7 +12,7 @@ import (
 func LogParams(logger logs.Logger) HandlerFunc {
 	return func(c *Context) {
 		params := ""
-		if c.ContentType() == "application/json" {
+		if c.ContentType() == "app/json" {
 			body, _ := ioutil.ReadAll(c.Request.Body)
 			c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 			params += string(body)
@@ -65,7 +65,7 @@ func PanicRecovery(logger logs.Logger) HandlerFunc {
 				var buf [4096]byte
 				n := runtime.Stack(buf[:], false)
 				logger.Error(c, "[panic] %v, stack: %s", r, string(buf[:n]))
-				c.SendError(NewInternalError("Server internal error"))
+				c.SendError(NewInternalError("Service internal error"))
 			}
 
 			// error log

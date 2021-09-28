@@ -43,13 +43,13 @@ func (e *Engine) WrapPProf() {
 	WrapPProf(e.Engine)
 }
 
-func (e *Engine) Close() error {
+func (e *Engine) Stop(ctx context.Context) error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	return e.httpServer.Shutdown(context.Background())
 }
 
-func (e *Engine) Run() error {
+func (e *Engine) Start(ctx context.Context) error {
 	e.mu.Lock()
 	e.httpServer = &http.Server{
 		Addr:         e.addr,

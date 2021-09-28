@@ -2,23 +2,29 @@ package facade
 
 import (
 	"github.com/go-redis/redis/v8"
-	"github.com/zhangliang-zl/reskit"
-	"github.com/zhangliang-zl/reskit/component"
+	"github.com/zhangliang-zl/reskit/app"
 	"github.com/zhangliang-zl/reskit/lock"
 )
 
 func RegisterMutexFactory(id string, kvstroe *redis.Client) error {
-	logger := Logger(compMutex)
-	factory := lock.NewRedisMutexFactory(logger, kvstroe, "")
-	instance := component.Make(factory, nil, nil)
-	return reskit.App().SetComponent(compMutex, id, instance)
+	id = buildID(compMutex, id)
+	logger, err := Logger(compMutex)
+	if err != nil {
+		return err
+	}
+	factory := lock.NewRedisMutexFactory(logger, kvstroe, "Mutex:"+id)
+
+	instance := app.MakeComponent(factory, nil)
+	App().RegisterComponent(instance, id)
+	return nil
 }
 
 func MutexFactory(id string) lock.Factory {
-	instance, ok := reskit.App().Component(compMutex, id)
+	id = buildID(compMutex, id)
+	instance, ok := App().Component(id)
 
 	if !ok {
 		panic(compMutex + noRegister)
 	}
-	return instance.(lock.Factory)
+	return instance.Object().(lock.Factory)
 }

@@ -19,8 +19,8 @@ type ServerOptions struct {
 }
 
 type Server struct {
-	opts ServerOptions
-	mu   sync.Mutex
+	opts       ServerOptions
+	mu         sync.Mutex
 	grpcServer *grpc.Server
 	logger     logs.Logger
 }
@@ -37,8 +37,7 @@ func (s *Server) GrpcServer() *grpc.Server {
 	return s.grpcServer
 }
 
-func (s *Server) Run() error {
-	ctx := context.Background()
+func (s *Server) Start(ctx context.Context) error {
 	logger := s.logger
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.opts.Service.Port))
 	if err != nil {
@@ -63,7 +62,7 @@ func (s *Server) Run() error {
 		for i := 0; i < retry; i++ {
 			if err = s.grpcServer.Serve(lis); err != nil {
 				if err == grpc.ErrServerStopped {
-					logger.Info(ctx, "grpc server closed")
+					logger.Info(ctx, "grpcx server closed")
 					break
 				}
 
@@ -85,7 +84,7 @@ func (s *Server) Run() error {
 	}
 }
 
-func (s *Server) Close() error {
+func (s *Server) Stop(ctx context.Context) error {
 	s.mu.Lock()
 	s.grpcServer.GracefulStop()
 	s.mu.Unlock()

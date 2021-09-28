@@ -7,11 +7,15 @@ const (
 )
 
 const (
-	compDb     = "_db"
-	compGrpc   = "_grpc"
-	compRedis  = "_redis"
-	compServer = "_server"
-	compMutex  = "_mutex"
-	compCache  = "_cache"
-	compQueue  = "_queue"
+	compDb            = "_db"
+	serviceGrpc       = "_grpc"
+	compRedis         = "_redis"
+	serviceHttpServer = "_http"
+	compMutex         = "_mutex"
+	compCache         = "_cache"
+	compQueue         = "_queue"
 )
+
+func buildID(cType, id string) string {
+	return id + cType
+}
