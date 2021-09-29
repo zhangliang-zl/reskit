@@ -3,7 +3,7 @@ package mq
 import (
 	"context"
 	"github.com/beanstalkd/go-beanstalk"
-	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/zhangliang-zl/reskit/log"
 	"strconv"
 	"sync"
 	"time"
@@ -94,7 +94,7 @@ const (
 )
 
 type beanstalkService struct {
-	logger   logs.Logger
+	logger   log.Logger
 	stopChan chan bool
 }
 
@@ -134,7 +134,7 @@ loop:
 	}
 }
 
-func NewBeanstalkService(logger logs.Logger) Service {
+func NewBeanstalkService(logger log.Logger) Service {
 	return &beanstalkService{
 		logger:   logger,
 		stopChan: make(chan bool),

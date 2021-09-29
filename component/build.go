@@ -6,10 +6,10 @@ import (
 	"github.com/zhangliang-zl/reskit/component/db"
 	"github.com/zhangliang-zl/reskit/component/lock"
 	kvstore "github.com/zhangliang-zl/reskit/component/redis"
-	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/zhangliang-zl/reskit/log"
 )
 
-func NewRedis(opts kvstore.Options, logger logs.Logger) (Interface, error) {
+func NewRedis(opts kvstore.Options, logger log.Logger) (Interface, error) {
 	instance, err := kvstore.New(opts, logger)
 	if err != nil {
 		return nil, err
@@ -18,13 +18,13 @@ func NewRedis(opts kvstore.Options, logger logs.Logger) (Interface, error) {
 	return Make(instance, instance.Close), nil
 }
 
-func NewMutexFactory(prefix string, kvstroe *redis.Client, logger logs.Logger) (Interface, error) {
+func NewMutexFactory(prefix string, kvstroe *redis.Client, logger log.Logger) (Interface, error) {
 	factory := lock.NewRedisMutexFactory(logger, kvstroe, prefix)
 	instance := Make(factory, nil)
 	return instance, nil
 }
 
-func NewDB(opts db.Options, logger logs.Logger) (Interface, error) {
+func NewDB(opts db.Options, logger log.Logger) (Interface, error) {
 	client, err := db.New(opts, logger)
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func NewDB(opts db.Options, logger logs.Logger) (Interface, error) {
 	return Make(client, closeFunc), nil
 }
 
-func NewRedisCache(prefix string, kvstroe *redis.Client, logger logs.Logger) Interface {
+func NewRedisCache(prefix string, kvstroe *redis.Client, logger log.Logger) Interface {
 	instance := cache.NewRedisCache(kvstroe, logger, prefix)
 	return Make(instance, nil)
 }

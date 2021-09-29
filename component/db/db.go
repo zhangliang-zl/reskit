@@ -1,7 +1,7 @@
 package db
 
 import (
-	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/zhangliang-zl/reskit/log"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
@@ -18,10 +18,10 @@ type Options struct {
 	LogLevel        string `json:"logLevel"`
 }
 
-func New(opts Options, logger logs.Logger) (*gorm.DB, error) {
+func New(opts Options, logger log.Logger) (*gorm.DB, error) {
 
 	if opts.LogLevel != "" {
-		logger.SetLevel(logs.LevelVal(opts.LogLevel))
+		logger.SetLevel(log.ParseLevel(opts.LogLevel))
 	}
 
 	db, err := gorm.Open(mysql.Open(opts.Dsn), &gorm.Config{DisableAutomaticPing: true})

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/zhangliang-zl/reskit/log"
 	"math/rand"
 	"strconv"
 	"time"
@@ -24,7 +24,7 @@ const (
 
 type RedisMutex struct {
 	redisClient *redis.Client
-	logger      logs.Logger
+	logger      log.Logger
 
 	opts Options
 
@@ -155,7 +155,7 @@ func (m *RedisMutex) UnLock(ctx context.Context) {
 
 type redisMutexFactory struct {
 	redisClient *redis.Client
-	logger      logs.Logger
+	logger      log.Logger
 	keyPrefix   string
 }
 
@@ -186,7 +186,7 @@ func (factory redisMutexFactory) New(opts Options) Mutex {
 	}
 }
 
-func NewRedisMutexFactory(logger logs.Logger, redisClient *redis.Client, keyPrefix string) Factory {
+func NewRedisMutexFactory(logger log.Logger, redisClient *redis.Client, keyPrefix string) Factory {
 	if keyPrefix == "" {
 		keyPrefix = DefaultKeyPrefix
 	}

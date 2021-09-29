@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/zhangliang-zl/reskit/log"
 	gormlogger "gorm.io/gorm/logger"
 	"gorm.io/gorm/utils"
 	"strings"
@@ -10,7 +10,7 @@ import (
 )
 
 type traceLogger struct {
-	logger logs.Logger
+	logger log.Logger
 	gormlogger.Writer
 	gormlogger.Config
 	infoStr, warnStr, errStr            string
@@ -93,7 +93,7 @@ func simplify(file string) string {
 	return file
 }
 
-func newTraceLogger(logger logs.Logger, config gormlogger.Config) gormlogger.Interface {
+func newTraceLogger(logger log.Logger, config gormlogger.Config) gormlogger.Interface {
 	var (
 		infoStr      = "%s"
 		warnStr      = "%s"

@@ -7,7 +7,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/vmihailenco/msgpack/v5"
 	lock2 "github.com/zhangliang-zl/reskit/component/lock"
-	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/zhangliang-zl/reskit/log"
 	"time"
 )
 
@@ -16,9 +16,9 @@ const (
 )
 
 type RedisCache struct {
-	client      *redis.Client
-	logger      logs.Logger
-	maxBuild    time.Duration // GetOrSet() The maximum time to build the cache, beyond which other threads can build
+	client   *redis.Client
+	logger   log.Logger
+	maxBuild time.Duration // GetOrSet() The maximum time to build the cache, beyond which other threads can build
 	lockFactory lock2.Factory
 }
 
@@ -149,7 +149,7 @@ func (*RedisCache) buildKey(key string) string {
 	return redisKeyPrefix + md5Key
 }
 
-func NewRedisCache(client *redis.Client, logger logs.Logger, prefix string) Cache {
+func NewRedisCache(client *redis.Client, logger log.Logger, prefix string) Cache {
 	if prefix == "" {
 		prefix = redisKeyPrefix
 	}

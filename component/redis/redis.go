@@ -3,7 +3,7 @@ package redis
 import (
 	"context"
 	"github.com/go-redis/redis/v8"
-	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/zhangliang-zl/reskit/log"
 	"time"
 )
 
@@ -14,9 +14,9 @@ type Options struct {
 	LogLevel string `json:"logLevel"`
 }
 
-func New(opts Options, logger logs.Logger) (*redis.Client, error) {
+func New(opts Options, logger log.Logger) (*redis.Client, error) {
 	if opts.LogLevel != "" {
-		logger.SetLevel(logs.LevelVal(opts.LogLevel))
+		logger.SetLevel(log.ParseLevel(opts.LogLevel))
 	}
 
 	client := redis.NewClient(&redis.Options{
