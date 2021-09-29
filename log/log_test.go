@@ -1,8 +1,8 @@
-package logs
+package log
 
 import (
 	"context"
-	"github.com/zhangliang-zl/reskit/logs/driver/stdout"
+	"github.com/zhangliang-zl/reskit/log/driver/stdout"
 	"testing"
 )
 
@@ -14,6 +14,8 @@ func TestLogger(t *testing.T) {
 	}
 
 	ctx := WithTraceID(context.Background())
+	l.Debug(ctx, "error message")
+	l.Info(ctx, "info message")
 	l.Error(ctx, "error message")
 	l.Warn(ctx, "warn message")
 }

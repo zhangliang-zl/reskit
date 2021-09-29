@@ -1,13 +1,9 @@
-package logs
+package log
 
 import (
-	"github.com/zhangliang-zl/reskit/logs/driver"
+	"github.com/zhangliang-zl/reskit/log/driver"
 	"sync"
 )
-
-type Factory interface {
-	Get(tag string) (Logger, error)
-}
 
 type factory struct {
 	level   Level
