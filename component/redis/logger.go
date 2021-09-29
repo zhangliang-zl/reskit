@@ -1,10 +1,10 @@
 package redis
 
 import "context"
-import "github.com/zhangliang-zl/reskit/log"
+import "github.com/zhangliang-zl/reskit/logs"
 
 type logWriter struct {
-	l log.Logger
+	l logs.Logger
 }
 
 func (r *logWriter) Printf(ctx context.Context, msg string, data ...interface{}) {

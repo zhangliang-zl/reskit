@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"github.com/zhangliang-zl/reskit/log"
+	"github.com/zhangliang-zl/reskit/logs"
 	"time"
 )
 
 type logHook struct {
-	l log.Logger
+	l logs.Logger
 }
 
 func (logHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {

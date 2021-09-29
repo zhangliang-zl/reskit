@@ -2,13 +2,13 @@ package service
 
 import (
 	"github.com/zhangliang-zl/reskit/logs"
-	"github.com/zhangliang-zl/reskit/service/server/grpcx"
-	"github.com/zhangliang-zl/reskit/service/server/web"
+	"github.com/zhangliang-zl/reskit/transport/grpcx"
+	"github.com/zhangliang-zl/reskit/transport/httpx"
 	"google.golang.org/grpc"
 )
 
-func NewHttpServer(options web.Options, logger logs.Logger) Interface {
-	engine := web.NewServer(options, logger)
+func NewHttpServer(options httpx.Options, logger logs.Logger) Interface {
+	engine := httpx.NewServer(options, logger)
 	return Make(engine, engine.Start, engine.Stop)
 }
 

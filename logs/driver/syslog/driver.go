@@ -1,7 +1,7 @@
 package syslog
 
 import (
-	"github.com/zhangliang-zl/reskit/log/driver"
+	"github.com/zhangliang-zl/reskit/logs/driver"
 	"io"
 	"log/syslog"
 )

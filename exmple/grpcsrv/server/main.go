@@ -16,7 +16,7 @@ import (
 type helloServer struct{}
 
 func (s *helloServer) SayHello(_ context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
-	log.Printf("Received: %v", in.Name)
+	logs.Printf("Received: %v", in.Name)
 	return &pb.HelloReply{Message: "Hello " + in.Name}, nil
 }
 
@@ -27,7 +27,7 @@ func main() {
 		Name:     "hero",
 	})
 	if err != nil {
-		log.Fatal(app.Run())
+		logs.Fatal(app.Run())
 	}
 
 
@@ -46,8 +46,8 @@ func main() {
 	}
 
 	if err := facade.RegisterGrpcServer(opts, "hero", rpcServer); err != nil {
-		log.Fatalln(err)
+		logs.Fatalln(err)
 	}
 
-	log.Fatal(app.Run())
+	logs.Fatal(app.Run())
 }

@@ -1,7 +1,7 @@
-package log
+package logs
 
 import (
-	"github.com/zhangliang-zl/reskit/log/driver"
+	"github.com/zhangliang-zl/reskit/logs/driver"
 	"sync"
 )
 

@@ -1,4 +1,4 @@
-package web
+package httpx
 
 import (
 	"github.com/gin-gonic/gin"
@@ -15,7 +15,7 @@ type Options struct {
 
 func NewServer(opts Options, logger logs.Logger) *Engine {
 	if opts.LogLevel != "" {
-		logger.SetLevel(logs.LevelVal(opts.LogLevel))
+		logger.SetLevel(logs.ParseLevel(opts.LogLevel))
 	}
 
 	gin.SetMode(gin.ReleaseMode)

@@ -1,4 +1,4 @@
-package web
+package httpx
 
 import (
 	"net/http/pprof"
@@ -7,12 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// WrapPProf Wrap adds several routes from package `net/web/pprof` to *gin.Engine object
+// WrapPProf Wrap adds several routes from package `net/httpx/pprof` to *gin.Engine object
 func WrapPProf(router *gin.Engine) {
 	wrapGroup(&router.RouterGroup)
 }
 
-// wrapGroup adds several routes from package `net/web/pprof` to *gin.RouterGroup object
+// wrapGroup adds several routes from package `net/httpx/pprof` to *gin.RouterGroup object
 func wrapGroup(router *gin.RouterGroup) {
 	routers := []struct {
 		Method  string

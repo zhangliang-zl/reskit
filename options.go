@@ -3,7 +3,7 @@ package reskit
 import (
 	"context"
 	"github.com/zhangliang-zl/reskit/component"
-	"github.com/zhangliang-zl/reskit/log"
+	"github.com/zhangliang-zl/reskit/logs"
 	"github.com/zhangliang-zl/reskit/service"
 	"os"
 )
@@ -20,7 +20,7 @@ type options struct {
 
 	ctx           context.Context
 	signals       []os.Signal
-	loggerFactory log.Factory
+	loggerFactory logs.Factory
 }
 
 func WithName(name string) Option {
@@ -37,7 +37,7 @@ func WithEnv(env string) Option {
 	}
 }
 
-func WithLoggerFactory(factory log.Factory) Option {
+func WithLoggerFactory(factory logs.Factory) Option {
 	return func(o *options) {
 		if factory != nil {
 			o.loggerFactory = factory

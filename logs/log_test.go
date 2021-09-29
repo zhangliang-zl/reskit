@@ -1,8 +1,8 @@
-package log
+package logs
 
 import (
 	"context"
-	"github.com/zhangliang-zl/reskit/log/driver/stdout"
+	"github.com/zhangliang-zl/reskit/logs/driver/stdout"
 	"testing"
 )
 

@@ -1,14 +1,14 @@
 package service
 
 import (
-	"github.com/zhangliang-zl/reskit/log"
-	"github.com/zhangliang-zl/reskit/log/driver/stdout"
+	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/zhangliang-zl/reskit/logs/driver/stdout"
 	"testing"
 	"time"
 )
 
 func startServer(opts ServerOptions) error {
-	loggerFac := log.NewFactory(log.LevelWarn, stdout.Driver())
+	loggerFac := logs.NewFactory(logs.LevelWarn, stdout.Driver())
 	logger, _ := loggerFac.Get("uuid")
 	ser, err := NewServer(opts, logger)
 	if err != nil {

@@ -1,4 +1,4 @@
-package web
+package httpx
 
 import (
 	"context"
@@ -61,7 +61,7 @@ func (e *Engine) Start(ctx context.Context) error {
 
 	err := e.httpServer.ListenAndServe()
 	if err == http.ErrServerClosed {
-		e.logger.Info(ctx, "web closed")
+		e.logger.Info(ctx, "httpx closed")
 		return nil
 	}
 

@@ -1,4 +1,4 @@
-package web
+package httpx
 
 import (
 	"bytes"
@@ -68,7 +68,7 @@ func PanicRecovery(logger logs.Logger) HandlerFunc {
 				c.SendError(NewInternalError("Service internal error"))
 			}
 
-			// error log
+			// error logs
 			lastErr := c.Errors.Last()
 			if lastErr != nil {
 				logger.Error(c, "[error]  %v ", lastErr)

@@ -2,7 +2,7 @@ package validation
 
 import (
 	"github.com/go-playground/validator/v10"
-	"github.com/zhangliang-zl/reskit/helpers/validation/idcard"
+	"github.com/zhangliang-zl/reskit/helper/validation/idcard"
 	"regexp"
 )
 

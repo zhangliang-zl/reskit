@@ -19,8 +19,8 @@ type ServerOptions struct {
 }
 
 type Server struct {
-	opts ServerOptions
-	mu   sync.Mutex
+	opts       ServerOptions
+	mu         sync.Mutex
 	grpcServer *grpc.Server
 	logger     logs.Logger
 }
@@ -84,7 +84,7 @@ func (s *Server) Start(ctx context.Context) error {
 	}
 }
 
-func (s *Server) Stop(ctx context.Context) error {
+func (s *Server) Stop(_ context.Context) error {
 	s.mu.Lock()
 	s.grpcServer.GracefulStop()
 	s.mu.Unlock()

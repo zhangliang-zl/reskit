@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/zhangliang-zl/reskit/component"
-	"github.com/zhangliang-zl/reskit/log"
+	"github.com/zhangliang-zl/reskit/logs"
 	"github.com/zhangliang-zl/reskit/service"
 	"golang.org/x/sync/errgroup"
 	"os"
@@ -15,7 +15,7 @@ import (
 
 type App struct {
 	opts   options
-	logger log.Logger
+	logger logs.Logger
 
 	ctx    context.Context
 	cancel func()
@@ -97,7 +97,7 @@ func (app *App) Name() string {
 	return app.opts.name
 }
 
-func (app *App) LoggerFactory() log.Factory {
+func (app *App) LoggerFactory() logs.Factory {
 	return app.opts.loggerFactory
 }
 
@@ -108,7 +108,7 @@ func (app *App) Context() context.Context {
 func NewApp(opts ...Option) (*App, error) {
 
 	o := options{
-		loggerFactory: log.DefaultFactory,
+		loggerFactory: logs.DefaultFactory,
 		ctx:           context.Background(),
 		signals:       []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		services:      make(map[string]service.Interface, 0),

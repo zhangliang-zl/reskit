@@ -1,13 +1,13 @@
 package main
 
 import (
+	"context"
 	"github.com/zhangliang-zl/reskit"
 	"github.com/zhangliang-zl/reskit/component"
 	"github.com/zhangliang-zl/reskit/component/redis"
 	"github.com/zhangliang-zl/reskit/logs"
 	"github.com/zhangliang-zl/reskit/service"
-	"github.com/zhangliang-zl/reskit/service/server/web"
-	"log"
+	"github.com/zhangliang-zl/reskit/transport/httpx"
 )
 
 const (
@@ -23,16 +23,16 @@ func main() {
 	// init components
 	kvstore, err := component.NewRedis(redis.Options{Addr: ":6379"}, rdsLogger)
 	if err != nil {
-		log.Fatal(err)
+		rdsLogger.Fatal(context.Background(), "error:%v", err)
 	}
 
 	// init service
-	srv := service.NewHttpServer(web.Options{Addr: ":8096"}, webLogger)
-	// web server setting
-	engine := srv.Object().(*web.Engine)
-	engine.UseMiddleware(web.PanicRecovery(webLogger))
-	engine.AddRoute("GET", "/hello", func(ctx *web.Context) {
-		ctx.Success(web.Map{"result": "world"})
+	srv := service.NewHttpServer(httpx.Options{Addr: ":8096"}, webLogger)
+	// httpx server setting
+	engine := srv.Object().(*httpx.Engine)
+	engine.UseMiddleware(httpx.PanicRecovery(webLogger))
+	engine.AddRoute("GET", "/hello", func(ctx *httpx.Context) {
+		ctx.Success(httpx.Map{"result": "world"})
 	})
 
 	app, _ := reskit.NewApp(
@@ -45,6 +45,9 @@ func main() {
 		// services
 		reskit.WithService("webServer1", srv),
 	)
-
-	log.Fatal(app.Run())
+	appLogger, _ := logFac.Get("_app")
+	err = app.Run()
+	if err != nil {
+		appLogger.Fatal(context.Background(), "app run :%v", err)
+	}
 }

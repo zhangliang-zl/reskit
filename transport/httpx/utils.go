@@ -1,8 +1,8 @@
-package web
+package httpx
 
 import (
 	"github.com/gin-gonic/gin/binding"
-	"github.com/zhangliang-zl/reskit/helpers/validation"
+	"github.com/zhangliang-zl/reskit/helper/validation"
 )
 
 func BindValidator(validator *validation.Validator) {

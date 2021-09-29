@@ -3,8 +3,8 @@ package lock
 import (
 	"context"
 	"github.com/zhangliang-zl/reskit/component/redis"
-	"github.com/zhangliang-zl/reskit/log"
-	"github.com/zhangliang-zl/reskit/log/driver/stdout"
+	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/zhangliang-zl/reskit/logs/driver/stdout"
 	"sync"
 	"testing"
 	"time"
@@ -13,7 +13,7 @@ import (
 var factory Factory
 
 func init() {
-	loggerFactory := log.NewFactory(log.LevelWarn, stdout.Driver())
+	loggerFactory := logs.NewFactory(logs.LevelWarn, stdout.Driver())
 	redisLogger, _ := loggerFactory.Get("redis")
 	kvStore, _ := redis.New(redis.Options{
 		Addr:     "localhost:6379",

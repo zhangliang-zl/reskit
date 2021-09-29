@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/zhangliang-zl/reskit/log"
-	"github.com/zhangliang-zl/reskit/log/driver/stdout"
+	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/zhangliang-zl/reskit/logs/driver/stdout"
 	"math/rand"
 	"sync"
 	"testing"
@@ -14,7 +14,7 @@ import (
 )
 
 var q, _ = NewBeanstalkQueue("localhost:11300")
-var loggerFactory = log.NewFactory(log.LevelWarn, stdout.Driver())
+var loggerFactory = logs.NewFactory(logs.LevelWarn, stdout.Driver())
 var logger, _ = loggerFactory.Get("mq")
 var runTimes = 0
 

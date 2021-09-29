@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/zhangliang-zl/reskit/component/snowflake"
-	"github.com/zhangliang-zl/reskit/log"
+	"github.com/zhangliang-zl/reskit/logs"
 	"net"
 	"strconv"
 	"time"
@@ -12,7 +12,7 @@ import (
 
 type Server struct {
 	port     int
-	logger   log.Logger
+	logger   logs.Logger
 	idWorker *snowflake.Worker
 }
 
@@ -24,7 +24,7 @@ type ServerOptions struct {
 	Epoch      int64 // 推荐系统开始使用时开始
 }
 
-func NewServer(opts ServerOptions, logger log.Logger) (*Server, error) {
+func NewServer(opts ServerOptions, logger logs.Logger) (*Server, error) {
 	workerID := opts.WorkerID
 	idWorker, err := snowflake.NewWorker(workerID, opts.WorkerBits, opts.NumberBits, opts.Epoch)
 	if err != nil {
@@ -43,7 +43,7 @@ func (s *Server) Run() error {
 	if err != nil {
 		return err
 	}
-	ctx := log.WithTraceID(context.Background())
+	ctx := logs.WithTraceID(context.Background())
 
 	listener, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
@@ -69,7 +69,7 @@ func (s *Server) handle(conn net.Conn) error {
 
 	defer conn.Close()
 	request := make([]byte, 128)
-	ctx := log.WithTraceID(context.Background())
+	ctx := logs.WithTraceID(context.Background())
 loop:
 	for {
 		readLen, err := conn.Read(request)

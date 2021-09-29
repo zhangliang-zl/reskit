@@ -1,4 +1,4 @@
-package web
+package httpx
 
 import (
 	"github.com/gin-gonic/gin"

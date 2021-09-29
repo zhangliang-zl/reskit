@@ -3,8 +3,8 @@ package cache
 import (
 	"context"
 	"github.com/zhangliang-zl/reskit/component/redis"
-	"github.com/zhangliang-zl/reskit/log"
-	"github.com/zhangliang-zl/reskit/log/driver/stdout"
+	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/zhangliang-zl/reskit/logs/driver/stdout"
 	"testing"
 	"time"
 )
@@ -13,7 +13,7 @@ var redisCache Cache
 var memoryCache Cache
 
 func init() {
-	loggerFactory := log.NewFactory(log.LevelWarn, stdout.Driver())
+	loggerFactory := logs.NewFactory(logs.LevelWarn, stdout.Driver())
 	redisLogger, _ := loggerFactory.Get("redis")
 	cacheLogger, _ := loggerFactory.Get("cache")
 	kvStore, _ := redis.New(redis.Options{
