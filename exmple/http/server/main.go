@@ -7,7 +7,7 @@ import (
 	"github.com/zhangliang-zl/reskit/component/redis"
 	"github.com/zhangliang-zl/reskit/logs"
 	"github.com/zhangliang-zl/reskit/service"
-	"github.com/zhangliang-zl/reskit/transport/httpx"
+	"github.com/zhangliang-zl/reskit/transport/web"
 )
 
 const (
@@ -27,12 +27,12 @@ func main() {
 	}
 
 	// init service
-	srv := service.NewHttpServer(httpx.Options{Addr: ":8096"}, webLogger)
-	// httpx server setting
-	engine := srv.Object().(*httpx.Engine)
-	engine.UseMiddleware(httpx.PanicRecovery(webLogger))
-	engine.AddRoute("GET", "/hello", func(ctx *httpx.Context) {
-		ctx.Success(httpx.Map{"result": "world"})
+	srv := service.NewHttpServer(web.Options{Addr: ":8096"}, webLogger)
+	// web server setting
+	engine := srv.Object().(*web.Engine)
+	engine.UseMiddleware(web.PanicRecovery(webLogger))
+	engine.AddRoute("GET", "/hello", func(ctx *web.Context) {
+		ctx.Success(web.Map{"result": "world"})
 	})
 
 	app, _ := reskit.NewApp(
