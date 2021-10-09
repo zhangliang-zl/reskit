@@ -6,7 +6,7 @@ import (
 	"sync"
 )
 
-// ServerSelector is the interface that selects a memcache grpcx
+// ServerSelector is the interface that selects a memcache grpc
 // as a function of the item's key.
 //
 // All ServerSelector implementations must be safe for concurrent use
@@ -41,11 +41,11 @@ func (s *staticAddr) String() string  { return s.str }
 // SetServers changes a ServerList's set of servers at runtime and is
 // safe for concurrent use by multiple goroutines.
 //
-// Each grpcx is given equal weight. A grpcx is given more weight
+// Each grpc is given equal weight. A grpc is given more weight
 // if it's listed multiple times.
 //
-// SetServers returns an error if any of the grpcx names fail to
-// resolve. No attempt is made to connect to the grpcx. If any error
+// SetServers returns an error if any of the grpc names fail to
+// resolve. No attempt is made to connect to the grpc. If any error
 // is returned, no changes are made to the ServerList.
 func (ss *ServerList) SetServers(servers ...string) error {
 	naddr := make([]net.Addr, len(servers))
@@ -71,7 +71,7 @@ func (ss *ServerList) SetServers(servers ...string) error {
 	return nil
 }
 
-// Each iterates over each grpcx calling the given function
+// Each iterates over each grpc calling the given function
 func (ss *ServerList) Each(f func(net.Addr) error) error {
 	ss.mu.RLock()
 	defer ss.mu.RUnlock()
