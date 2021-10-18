@@ -15,14 +15,9 @@ type Options struct {
 	ConnMaxLifetime int64  `json:"conn_max_lifetime"`
 	ConnMaxIdleTime int64  `json:"conn_max_idle_time"`
 	SlowThreshold   int64  `json:"slow_threshold"`
-	LogLevel        string `json:"logLevel"`
 }
 
 func New(opts Options, logger logs.Logger) (*gorm.DB, error) {
-
-	if opts.LogLevel != "" {
-		logger.SetLevel(logs.ParseLevel(opts.LogLevel))
-	}
 
 	db, err := gorm.Open(mysql.Open(opts.Dsn), &gorm.Config{DisableAutomaticPing: true})
 	if err != nil {
