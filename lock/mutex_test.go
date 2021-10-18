@@ -2,9 +2,9 @@ package lock
 
 import (
 	"context"
-	"github.com/zhangliang-zl/reskit/component/redis"
 	"github.com/zhangliang-zl/reskit/logs"
 	"github.com/zhangliang-zl/reskit/logs/driver/stdout"
+	"github.com/zhangliang-zl/reskit/redis"
 	"sync"
 	"testing"
 	"time"

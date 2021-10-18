@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"github.com/go-redis/redis/v8"
 	"github.com/vmihailenco/msgpack/v5"
-	lock2 "github.com/zhangliang-zl/reskit/component/lock"
+	lock2 "github.com/zhangliang-zl/reskit/lock"
 	"github.com/zhangliang-zl/reskit/logs"
 	"time"
 )

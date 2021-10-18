@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/zhangliang-zl/reskit/component/snowflake"
 	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/zhangliang-zl/reskit/snowflake"
 	"net"
 	"strconv"
 	"time"
