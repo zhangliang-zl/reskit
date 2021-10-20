@@ -1,44 +1,14 @@
-package cache
+package test
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/zhangliang-zl/reskit/redis"
+	"github.com/zhangliang-zl/reskit/cache"
 	"testing"
 	"time"
+
 )
 
-var redisCache Cache
-var memoryCache Cache
-
-func init() {
-
-	var redisLogger = log.NewHelper(log.DefaultLogger, log.WithMessageKey("redis"))
-	var cacheLogger = log.NewHelper(log.DefaultLogger, log.WithMessageKey("cache"))
-	kvStore, _ := redis.New(redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	}, redisLogger)
-
-	redisCache = NewRedisCache(
-		kvStore,
-		cacheLogger,
-		"Caching:",
-	)
-
-	memoryCache = NewMemoryCache(0)
-}
-
-func TestMemoryCache(t *testing.T) {
-	testCache(memoryCache, t)
-}
-
-func TestRedisCache(t *testing.T) {
-	testCache(redisCache, t)
-}
-
-func testCache(cache Cache, t *testing.T) {
+func AllCase(cache cache.Cache, t *testing.T) {
 	builtinTest(cache, t)
 	getOrSet(cache, t)
 	delete(cache, t)
@@ -56,7 +26,7 @@ func callbackFunc(id string) (structObj, error) {
 	}, nil
 }
 
-func builtinTest(cache Cache, t *testing.T) {
+func builtinTest(cache cache.Cache, t *testing.T) {
 	ctx := context.TODO()
 	boolVal(cache, ctx, t)
 	stringVal(cache, ctx, t)
@@ -67,7 +37,7 @@ func builtinTest(cache Cache, t *testing.T) {
 	sliceVal(cache, ctx, t)
 }
 
-func boolVal(cache Cache, ctx context.Context, t *testing.T) {
+func boolVal(cache cache.Cache, ctx context.Context, t *testing.T) {
 	var outBool bool
 	if err := cache.Set(ctx, "boolVal", true, 3*time.Second); err != nil {
 		t.Error(err)
@@ -77,7 +47,7 @@ func boolVal(cache Cache, ctx context.Context, t *testing.T) {
 	}
 }
 
-func stringVal(cache Cache, ctx context.Context, t *testing.T) {
+func stringVal(cache cache.Cache, ctx context.Context, t *testing.T) {
 	var out string
 	if err := cache.Set(ctx, "test1", "test1", 3*time.Second); err != nil {
 		t.Error(err)
@@ -87,7 +57,7 @@ func stringVal(cache Cache, ctx context.Context, t *testing.T) {
 	}
 }
 
-func intVal(cache Cache, ctx context.Context, t *testing.T) {
+func intVal(cache cache.Cache, ctx context.Context, t *testing.T) {
 	var intVal int64
 	if err := cache.Set(ctx, "intVal", 3, 3*time.Second); err != nil {
 		t.Error(err)
@@ -97,7 +67,7 @@ func intVal(cache Cache, ctx context.Context, t *testing.T) {
 	}
 }
 
-func mapVal(cache Cache, ctx context.Context, t *testing.T) {
+func mapVal(cache cache.Cache, ctx context.Context, t *testing.T) {
 	var mapVal map[string]int
 	if err := cache.Set(ctx, "mapVal", map[string]int{"test1": 1}, 3*time.Second); err != nil {
 		t.Error(err)
@@ -110,7 +80,7 @@ func mapVal(cache Cache, ctx context.Context, t *testing.T) {
 	}
 }
 
-func structObjVal(cache Cache, ctx context.Context, t *testing.T) {
+func structObjVal(cache cache.Cache, ctx context.Context, t *testing.T) {
 	var structVal structObj
 	if err := cache.Set(ctx, "structVal", structObj{"1", "Bob"}, 3*time.Second); err != nil {
 		t.Error(err)
@@ -123,7 +93,7 @@ func structObjVal(cache Cache, ctx context.Context, t *testing.T) {
 	}
 }
 
-func complexVal(cache Cache, ctx context.Context, t *testing.T) {
+func complexVal(cache cache.Cache, ctx context.Context, t *testing.T) {
 	var complexVal map[string][]structObj
 	if err := cache.Set(ctx, "complexVal", map[string][]structObj{
 		"key": {structObj{"111", "Bob"}},
@@ -138,7 +108,7 @@ func complexVal(cache Cache, ctx context.Context, t *testing.T) {
 	}
 }
 
-func sliceVal(cache Cache, ctx context.Context, t *testing.T) {
+func sliceVal(cache cache.Cache, ctx context.Context, t *testing.T) {
 	var sliceVal []string
 	if err := cache.Set(ctx, "sliceVal", []string{"111", "Bob"}, 3*time.Second); err != nil {
 		t.Error(err)
@@ -156,7 +126,7 @@ const (
 	delete1          = "delete:1"
 )
 
-func getOrSet(cache Cache, t *testing.T) {
+func getOrSet(cache cache.Cache, t *testing.T) {
 	var id = "abc"
 	var val1 structObj
 	var val2 structObj
@@ -185,7 +155,7 @@ func getOrSet(cache Cache, t *testing.T) {
 	}
 }
 
-func delete(cache Cache, t *testing.T) {
+func delete(cache cache.Cache, t *testing.T) {
 	ctx := context.TODO()
 	err := cache.Set(ctx, delete1, "111", time.Second*10)
 	if err != nil {

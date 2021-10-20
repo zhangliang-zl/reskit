@@ -13,7 +13,7 @@ type Cache interface {
 	GetOrSet(ctx context.Context, key string, val interface{}, ttl time.Duration, callback func() (interface{}, error)) (err error)
 }
 
-func copyObject(from interface{}, to interface{}) {
+func CopyObject(from interface{}, to interface{}) {
 	b, _ := msgpack.Marshal(from)
 	msgpack.Unmarshal(b, to)
 }

@@ -1,4 +1,4 @@
-package cache
+package memory
 
 import (
 	"context"
@@ -6,16 +6,18 @@ import (
 	"fmt"
 	"github.com/coocood/freecache"
 	"github.com/vmihailenco/msgpack/v5"
+	"github.com/zhangliang-zl/reskit/cache"
 	"sync"
 	"time"
 )
 
-type MemoryCache struct {
+type Cache struct {
+	size       int
 	freeCache  *freecache.Cache
 	mutexStore *sync.Map
 }
 
-func (m *MemoryCache) getLocker(key string) *sync.Mutex {
+func (m *Cache) getLocker(key string) *sync.Mutex {
 	lock, ok := m.mutexStore.Load(key)
 	if ok {
 		return lock.(*sync.Mutex)
@@ -26,7 +28,7 @@ func (m *MemoryCache) getLocker(key string) *sync.Mutex {
 	return l
 }
 
-func (m *MemoryCache) Get(ctx context.Context, key string, val interface{}) (bool, error) {
+func (m *Cache) Get(ctx context.Context, key string, val interface{}) (bool, error) {
 	b, err := m.freeCache.Get([]byte(key))
 	if err != nil && err != freecache.ErrNotFound {
 		return false, err
@@ -44,7 +46,7 @@ func (m *MemoryCache) Get(ctx context.Context, key string, val interface{}) (boo
 	return true, nil
 }
 
-func (m *MemoryCache) Set(ctx context.Context, key string, val interface{}, ttl time.Duration) error {
+func (m *Cache) Set(ctx context.Context, key string, val interface{}, ttl time.Duration) error {
 	data, err := msgpack.Marshal(val)
 	if err != nil {
 		return err
@@ -53,7 +55,7 @@ func (m *MemoryCache) Set(ctx context.Context, key string, val interface{}, ttl 
 	return m.freeCache.Set([]byte(key), data, int(ttl.Seconds()))
 }
 
-func (m *MemoryCache) Delete(ctx context.Context, key string) error {
+func (m *Cache) Delete(ctx context.Context, key string) error {
 	affected := m.freeCache.Del([]byte(key))
 	if affected {
 		return nil
@@ -62,13 +64,13 @@ func (m *MemoryCache) Delete(ctx context.Context, key string) error {
 	return errors.New(fmt.Sprintf("Delete fail, No key %s", key))
 }
 
-func (m *MemoryCache) GetOrSet(ctx context.Context, key string, val interface{}, ttl time.Duration, callback func() (interface{}, error)) (err error) {
+func (m *Cache) GetOrSet(ctx context.Context, key string, val interface{}, ttl time.Duration, callback func() (interface{}, error)) (err error) {
 
 	// When ttl<=0: callback() and return
 	if ttl <= 0 {
 		callbackVal, err := callback()
 		if err == nil {
-			copyObject(callbackVal, val)
+			cache.CopyObject(callbackVal, val)
 		}
 		return err
 	}
@@ -87,12 +89,12 @@ func (m *MemoryCache) GetOrSet(ctx context.Context, key string, val interface{},
 	}
 
 	// Key Not exist: callback() and set val
-	lock := m.getLocker("MemoryCache:" + key)
+	lock := m.getLocker("Cache:" + key)
 
 	lock.Lock()
 	defer lock.Unlock()
 
-	// Confirm again after getting the dlock
+	// Confirm again after getting the redislock
 	data, err = m.freeCache.Get(keyByte)
 	if len(data) > 0 {
 		return msgpack.Unmarshal(data, val)
@@ -117,12 +119,29 @@ func (m *MemoryCache) GetOrSet(ctx context.Context, key string, val interface{},
 	return msgpack.Unmarshal(p, val)
 }
 
-func NewMemoryCache(size int) Cache {
-	if size == 0 {
-		size = 64 * 1024 * 1024 // default 32MB
+func (c *Cache) init() {
+	c.freeCache = freecache.NewCache(c.size)
+}
+
+type Option func(c *Cache)
+
+// DefaultSize is 64M
+const DefaultSize = 64 * 1024 * 1024
+
+func Size(size int) Option {
+	return func(c *Cache) {
+		c.size = size
 	}
-	return &MemoryCache{
-		freeCache:  freecache.NewCache(size),
+}
+
+func NewCache(opts ...Option) cache.Cache {
+	c := &Cache{
+		size:       DefaultSize,
 		mutexStore: &sync.Map{},
 	}
+	for _, opt := range opts {
+		opt(c)
+	}
+	c.init()
+	return c
 }

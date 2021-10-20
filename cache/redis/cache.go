@@ -1,4 +1,4 @@
-package cache
+package redis
 
 import (
 	"context"
@@ -7,28 +7,26 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis/v8"
 	"github.com/vmihailenco/msgpack/v5"
-	lock2 "github.com/zhangliang-zl/reskit/dlock"
+	"github.com/zhangliang-zl/reskit/cache"
+	"github.com/zhangliang-zl/reskit/redislock"
 	"time"
 )
 
-const (
-	redisKeyPrefix = "Caching:"
-)
-
-type RedisCache struct {
+type Cache struct {
 	client      *redis.Client
+	keyPrefix   string
 	logger      *log.Helper
 	maxBuild    time.Duration // GetOrSet() The maximum time to build the cache, beyond which other threads can build
-	lockFactory lock2.Factory
+	lockFactory *redislock.Factory
 }
 
-func (c *RedisCache) Get(ctx context.Context, key string, val interface{}) (bool, error) {
+func (c *Cache) Get(ctx context.Context, key string, val interface{}) (bool, error) {
 	key = c.buildKey(key)
 	return c.get(ctx, key, val)
 }
 
-func (c *RedisCache) get(ctx context.Context, key string, val interface{}) (exist bool, err error) {
-	b, err := c.client.Get(ctx, key).Bytes()
+func (c *Cache) get(ctx context.Context, key string, val interface{}) (exist bool, err error) {
+	data, err := c.client.Get(ctx, key).Bytes()
 
 	// Cache miss
 	if err == redis.Nil {
@@ -41,19 +39,19 @@ func (c *RedisCache) get(ctx context.Context, key string, val interface{}) (exis
 		return
 	}
 
-	err = msgpack.Unmarshal(b, val)
+	err = msgpack.Unmarshal(data, val)
 	if err == nil {
 		exist = true
 	}
 	return
 }
 
-func (c *RedisCache) Set(ctx context.Context, key string, val interface{}, ttl time.Duration) error {
+func (c *Cache) Set(ctx context.Context, key string, val interface{}, ttl time.Duration) error {
 	key = c.buildKey(key)
 	return c.set(ctx, key, val, ttl)
 }
 
-func (c *RedisCache) set(ctx context.Context, key string, val interface{}, ttl time.Duration) error {
+func (c *Cache) set(ctx context.Context, key string, val interface{}, ttl time.Duration) error {
 	b, err := msgpack.Marshal(val)
 	err = c.client.Set(ctx, key, b, ttl).Err()
 	if err != nil {
@@ -62,7 +60,7 @@ func (c *RedisCache) set(ctx context.Context, key string, val interface{}, ttl t
 	return err
 }
 
-func (c *RedisCache) Delete(ctx context.Context, key string) error {
+func (c *Cache) Delete(ctx context.Context, key string) error {
 	key = c.buildKey(key)
 	err := c.delete(ctx, key)
 	if err != nil {
@@ -71,7 +69,7 @@ func (c *RedisCache) Delete(ctx context.Context, key string) error {
 	return err
 }
 
-func (c *RedisCache) GetOrSet(ctx context.Context, key string, valPointer interface{}, ttl time.Duration, callback func() (interface{}, error)) (err error) {
+func (c *Cache) GetOrSet(ctx context.Context, key string, valPointer interface{}, ttl time.Duration, callback func() (interface{}, error)) (err error) {
 	err = c.getOrSet(ctx, key, valPointer, ttl, callback)
 	if err != nil {
 		c.logger.Errorf("GetOrSet %s error:%v", key, err)
@@ -79,12 +77,12 @@ func (c *RedisCache) GetOrSet(ctx context.Context, key string, valPointer interf
 	return err
 }
 
-func (c *RedisCache) getOrSet(ctx context.Context, key string, val interface{}, ttl time.Duration, callback func() (interface{}, error)) (err error) {
+func (c *Cache) getOrSet(ctx context.Context, key string, val interface{}, ttl time.Duration, callback func() (interface{}, error)) (err error) {
 	// When ttl<=0: callback() and return
 	if ttl <= 0 {
 		callbackVal, err := callback()
 		if err == nil {
-			copyObject(callbackVal, val)
+			cache.CopyObject(callbackVal, val)
 		}
 		return err
 	}
@@ -101,15 +99,12 @@ func (c *RedisCache) getOrSet(ctx context.Context, key string, val interface{}, 
 	}
 
 	// Key Not exist: callback() and set val
-	locker := c.lockFactory.New(lock2.Options{
-		Key:        key,
-		RenewTimes: lock2.RenewClose,
-	})
+	locker := c.lockFactory.New(key)
 
 	locker.Lock(ctx)
 	defer locker.UnLock(ctx)
 
-	// Confirm again after getting the dlock
+	// Confirm again after getting the redislock
 	exist, _ = c.get(ctx, key, val)
 	if exist {
 		return
@@ -134,29 +129,50 @@ func (c *RedisCache) getOrSet(ctx context.Context, key string, val interface{}, 
 	return msgpack.Unmarshal(p, val)
 }
 
-func (c *RedisCache) delete(ctx context.Context, key string) error {
+func (c *Cache) delete(ctx context.Context, key string) error {
 	return c.client.Del(ctx, key).Err()
 }
 
-func (*RedisCache) buildKey(key string) string {
+func (c *Cache) buildKey(key string) string {
 	if len(key) < 256 {
-		return redisKeyPrefix + key
+		return c.keyPrefix + key
 	}
 
 	h := md5.New()
 	h.Write([]byte(key))
 	md5Key := hex.EncodeToString(h.Sum(nil))
-	return redisKeyPrefix + md5Key
+	return c.keyPrefix + md5Key
 }
 
-func NewRedisCache(client *redis.Client, logger *log.Helper, prefix string) Cache {
-	if prefix == "" {
-		prefix = redisKeyPrefix
+const DefaultKeyPrefix = "Caching:"
+
+var DefaultLogger = log.NewHelper(log.DefaultLogger, log.WithMessageKey("redis"))
+
+type Option func(c *Cache)
+
+func Prefix(key string) Option {
+	return func(c *Cache) {
+		c.keyPrefix = key
+	}
+}
+
+func Logger(logger *log.Helper) Option {
+	return func(c *Cache) {
+		c.logger = logger
+	}
+}
+
+func NewCache(client *redis.Client, lockFactory *redislock.Factory, opts ...Option) cache.Cache {
+	c := &Cache{
+		client:      client,
+		logger:      DefaultLogger,
+		keyPrefix:   DefaultKeyPrefix,
+		lockFactory: lockFactory,
 	}
 
-	return &RedisCache{
-		client:      client,
-		logger:      logger,
-		lockFactory: lock2.NewRedisMutexFactory(logger, client, ""),
+	for _, opt := range opts {
+		opt(c)
 	}
+
+	return c
 }
