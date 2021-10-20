@@ -2,8 +2,8 @@ package redis
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis/v8"
-	"github.com/zhangliang-zl/reskit/logs"
 	"time"
 )
 
@@ -11,13 +11,9 @@ type Options struct {
 	Addr     string `json:"addr"`
 	Password string `json:"password"`
 	DB       int    `json:"db"`
-	LogLevel string `json:"logLevel"`
 }
 
-func New(opts Options, logger logs.Logger) (*redis.Client, error) {
-	if opts.LogLevel != "" {
-		logger.SetLevel(logs.ParseLevel(opts.LogLevel))
-	}
+func New(opts Options, logger *log.Helper) (*redis.Client, error) {
 
 	client := redis.NewClient(&redis.Options{
 		Addr:     opts.Addr,

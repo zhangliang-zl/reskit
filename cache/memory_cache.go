@@ -92,7 +92,7 @@ func (m *MemoryCache) GetOrSet(ctx context.Context, key string, val interface{},
 	lock.Lock()
 	defer lock.Unlock()
 
-	// Confirm again after getting the lock
+	// Confirm again after getting the dlock
 	data, err = m.freeCache.Get(keyByte)
 	if len(data) > 0 {
 		return msgpack.Unmarshal(data, val)

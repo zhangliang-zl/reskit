@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/go-kratos/kratos/v2/log"
 	gormlogger "gorm.io/gorm/logger"
 	"gorm.io/gorm/utils"
 	"strings"
@@ -10,7 +10,7 @@ import (
 )
 
 type traceLogger struct {
-	logger logs.Logger
+	logger *log.Helper
 	gormlogger.Writer
 	gormlogger.Config
 	infoStr, warnStr, errStr            string
@@ -25,19 +25,19 @@ func (l *traceLogger) LogMode(level gormlogger.LogLevel) gormlogger.Interface {
 
 func (l traceLogger) Info(ctx context.Context, msg string, data ...interface{}) {
 	if l.LogLevel >= gormlogger.Info {
-		l.logger.Info(ctx, msg, append([]interface{}{simplify(utils.FileWithLineNum())}, data...)...)
+		l.logger.Infof(msg, append([]interface{}{simplify(utils.FileWithLineNum())}, data...)...)
 	}
 }
 
 func (l traceLogger) Warn(ctx context.Context, msg string, data ...interface{}) {
 	if l.LogLevel >= gormlogger.Warn {
-		l.logger.Warn(ctx, msg, append([]interface{}{simplify(utils.FileWithLineNum())}, data...)...)
+		l.logger.Warnf(msg, append([]interface{}{simplify(utils.FileWithLineNum())}, data...)...)
 	}
 }
 
 func (l traceLogger) Error(ctx context.Context, msg string, data ...interface{}) {
 	if l.LogLevel >= gormlogger.Error {
-		l.logger.Error(ctx, l.errStr+msg, append([]interface{}{simplify(utils.FileWithLineNum())}, data...)...)
+		l.logger.Errorf(l.errStr+msg, append([]interface{}{simplify(utils.FileWithLineNum())}, data...)...)
 	}
 }
 
@@ -50,24 +50,24 @@ func (l traceLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 			errMsg := l.distinctError(err.Error())
 			sql, rows := fc()
 			if rows == -1 {
-				l.logger.Error(ctx, l.traceErrStr, simplify(utils.FileWithLineNum()), errMsg, sql, "-", elapsedFloat)
+				l.logger.Errorf(l.traceErrStr, simplify(utils.FileWithLineNum()), errMsg, sql, "-", elapsedFloat)
 			} else {
-				l.logger.Error(ctx, l.traceErrStr, simplify(utils.FileWithLineNum()), errMsg, sql, rows, elapsedFloat)
+				l.logger.Errorf(l.traceErrStr, simplify(utils.FileWithLineNum()), errMsg, sql, rows, elapsedFloat)
 			}
 		case elapsed > l.SlowThreshold && l.SlowThreshold != 0 && l.LogLevel >= gormlogger.Warn:
 			sql, rows := fc()
 			if rows == -1 {
-				l.logger.Warn(ctx, l.traceWarnStr, simplify(utils.FileWithLineNum()), sql, "-", elapsedFloat)
+				l.logger.Warnf(l.traceWarnStr, simplify(utils.FileWithLineNum()), sql, "-", elapsedFloat)
 			} else {
-				l.logger.Warn(ctx, l.traceWarnStr, simplify(utils.FileWithLineNum()), sql, rows, elapsedFloat)
+				l.logger.Warnf(l.traceWarnStr, simplify(utils.FileWithLineNum()), sql, rows, elapsedFloat)
 			}
 
 		case l.LogLevel == gormlogger.Info:
 			sql, rows := fc()
 			if rows == -1 {
-				l.logger.Info(ctx, l.traceStr, simplify(utils.FileWithLineNum()), sql, "-", elapsedFloat)
+				l.logger.Infof(l.traceStr, simplify(utils.FileWithLineNum()), sql, "-", elapsedFloat)
 			} else {
-				l.logger.Info(ctx, l.traceStr, simplify(utils.FileWithLineNum()), sql, rows, elapsedFloat)
+				l.logger.Infof(l.traceStr, simplify(utils.FileWithLineNum()), sql, rows, elapsedFloat)
 			}
 		}
 	}
@@ -93,7 +93,7 @@ func simplify(file string) string {
 	return file
 }
 
-func newTraceLogger(logger logs.Logger, config gormlogger.Config) gormlogger.Interface {
+func newTraceLogger(logger *log.Helper, config gormlogger.Config) gormlogger.Interface {
 	var (
 		infoStr      = "%s"
 		warnStr      = "%s"

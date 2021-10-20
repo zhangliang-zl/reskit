@@ -1,9 +1,8 @@
 package service
 
 import (
-	"context"
 	"fmt"
-	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/zhangliang-zl/reskit/snowflake"
 	"net"
 	"strconv"
@@ -12,7 +11,7 @@ import (
 
 type Server struct {
 	port     int
-	logger   logs.Logger
+	logger   *log.Helper
 	idWorker *snowflake.Worker
 }
 
@@ -24,7 +23,7 @@ type ServerOptions struct {
 	Epoch      int64 // 推荐系统开始使用时开始
 }
 
-func NewServer(opts ServerOptions, logger logs.Logger) (*Server, error) {
+func NewServer(opts ServerOptions, logger *log.Helper) (*Server, error) {
 	workerID := opts.WorkerID
 	idWorker, err := snowflake.NewWorker(workerID, opts.WorkerBits, opts.NumberBits, opts.Epoch)
 	if err != nil {
@@ -43,7 +42,6 @@ func (s *Server) Run() error {
 	if err != nil {
 		return err
 	}
-	ctx := logs.WithTraceID(context.Background())
 
 	listener, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
@@ -54,7 +52,7 @@ func (s *Server) Run() error {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			s.logger.Error(ctx, "Accept Error:%s", err.Error())
+			s.logger.Errorf("Accept Error:%s", err.Error())
 			continue
 		}
 		go s.handle(conn)
@@ -69,7 +67,6 @@ func (s *Server) handle(conn net.Conn) error {
 
 	defer conn.Close()
 	request := make([]byte, 128)
-	ctx := logs.WithTraceID(context.Background())
 loop:
 	for {
 		readLen, err := conn.Read(request)
@@ -79,7 +76,7 @@ loop:
 
 		instruction := string(request[:readLen])
 		if readLen == 0 {
-			s.logger.Error(ctx, "ReadLen is 0 , client disconnect automatically")
+			s.logger.Errorf("ReadLen is 0 , client disconnect automatically")
 			break
 		}
 
@@ -89,14 +86,14 @@ loop:
 			uuidStr := strconv.FormatInt(uuid, 10)
 			respInfo := fmt.Sprintf("VALUE uuid 0 %d\r\n%s\r\nEND\r\n", len(uuidStr), uuidStr)
 			conn.Write([]byte(respInfo))
-			s.logger.Debug(ctx, "nextID is %d", uuid)
+			s.logger.Debugf("nextID is %d", uuid)
 
 		case "quit\r\n":
-			s.logger.Debug(ctx, "client is quit")
+			s.logger.Debugf("client is quit")
 			break loop
 
 		default:
-			s.logger.Warn(ctx, "unknown instructions")
+			s.logger.Warnf("unknown instructions")
 		}
 		request = make([]byte, 128)
 	}

@@ -1,12 +1,11 @@
-package mq
+package beanstalkMQ
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/zhangliang-zl/reskit/logs"
-	"github.com/zhangliang-zl/reskit/logs/driver/stdout"
+	"github.com/go-kratos/kratos/v2/log"
 	"math/rand"
 	"sync"
 	"testing"
@@ -14,8 +13,8 @@ import (
 )
 
 var q, _ = NewBeanstalkQueue("localhost:11300")
-var loggerFactory = logs.NewFactory(logs.LevelWarn, stdout.Driver())
-var logger, _ = loggerFactory.Get("mq")
+
+var logger  = log.NewHelper(log.DefaultLogger)
 var runTimes = 0
 
 func TestQueueBasic(t *testing.T) {

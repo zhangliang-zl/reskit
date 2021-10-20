@@ -1,7 +1,7 @@
 package db
 
 import (
-	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/go-kratos/kratos/v2/log"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
@@ -17,7 +17,7 @@ type Options struct {
 	SlowThreshold   int64  `json:"slow_threshold"`
 }
 
-func New(opts Options, logger logs.Logger) (*gorm.DB, error) {
+func New(opts Options, logger *log.Helper) (*gorm.DB, error) {
 
 	db, err := gorm.Open(mysql.Open(opts.Dsn), &gorm.Config{DisableAutomaticPing: true})
 	if err != nil {

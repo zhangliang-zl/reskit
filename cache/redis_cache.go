@@ -4,10 +4,10 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis/v8"
 	"github.com/vmihailenco/msgpack/v5"
-	lock2 "github.com/zhangliang-zl/reskit/lock"
-	"github.com/zhangliang-zl/reskit/logs"
+	lock2 "github.com/zhangliang-zl/reskit/dlock"
 	"time"
 )
 
@@ -16,9 +16,9 @@ const (
 )
 
 type RedisCache struct {
-	client   *redis.Client
-	logger   logs.Logger
-	maxBuild time.Duration // GetOrSet() The maximum time to build the cache, beyond which other threads can build
+	client      *redis.Client
+	logger      *log.Helper
+	maxBuild    time.Duration // GetOrSet() The maximum time to build the cache, beyond which other threads can build
 	lockFactory lock2.Factory
 }
 
@@ -32,7 +32,7 @@ func (c *RedisCache) get(ctx context.Context, key string, val interface{}) (exis
 
 	// Cache miss
 	if err == redis.Nil {
-		c.logger.Warn(ctx, "Cache Miss key %s", key)
+		c.logger.Warnf("Cache Miss key %s", key)
 		err = nil
 		return
 	}
@@ -57,7 +57,7 @@ func (c *RedisCache) set(ctx context.Context, key string, val interface{}, ttl t
 	b, err := msgpack.Marshal(val)
 	err = c.client.Set(ctx, key, b, ttl).Err()
 	if err != nil {
-		c.logger.Error(ctx, "redis set %s error:%v", key, err)
+		c.logger.Errorf("redis set %s error:%v", key, err)
 	}
 	return err
 }
@@ -66,7 +66,7 @@ func (c *RedisCache) Delete(ctx context.Context, key string) error {
 	key = c.buildKey(key)
 	err := c.delete(ctx, key)
 	if err != nil {
-		c.logger.Error(ctx, "Delete %s error:%v", key, err)
+		c.logger.Errorf("Delete %s error:%v", key, err)
 	}
 	return err
 }
@@ -74,7 +74,7 @@ func (c *RedisCache) Delete(ctx context.Context, key string) error {
 func (c *RedisCache) GetOrSet(ctx context.Context, key string, valPointer interface{}, ttl time.Duration, callback func() (interface{}, error)) (err error) {
 	err = c.getOrSet(ctx, key, valPointer, ttl, callback)
 	if err != nil {
-		c.logger.Error(ctx, "GetOrSet %s error:%v", key, err)
+		c.logger.Errorf("GetOrSet %s error:%v", key, err)
 	}
 	return err
 }
@@ -109,7 +109,7 @@ func (c *RedisCache) getOrSet(ctx context.Context, key string, val interface{}, 
 	locker.Lock(ctx)
 	defer locker.UnLock(ctx)
 
-	// Confirm again after getting the lock
+	// Confirm again after getting the dlock
 	exist, _ = c.get(ctx, key, val)
 	if exist {
 		return
@@ -128,7 +128,7 @@ func (c *RedisCache) getOrSet(ctx context.Context, key string, val interface{}, 
 
 	err = c.client.Set(ctx, key, p, ttl).Err()
 	if err != nil {
-		c.logger.Error(ctx, "redis set %s error:%v", key, err)
+		c.logger.Errorf("redis set %s error:%v", key, err)
 	}
 
 	return msgpack.Unmarshal(p, val)
@@ -149,7 +149,7 @@ func (*RedisCache) buildKey(key string) string {
 	return redisKeyPrefix + md5Key
 }
 
-func NewRedisCache(client *redis.Client, logger logs.Logger, prefix string) Cache {
+func NewRedisCache(client *redis.Client, logger *log.Helper, prefix string) Cache {
 	if prefix == "" {
 		prefix = redisKeyPrefix
 	}

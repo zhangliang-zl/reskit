@@ -1,11 +1,10 @@
-package lock
+package dlock
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis/v8"
-	"github.com/zhangliang-zl/reskit/logs"
 	"math/rand"
 	"strconv"
 	"time"
@@ -24,11 +23,11 @@ const (
 
 type RedisMutex struct {
 	redisClient *redis.Client
-	logger      logs.Logger
+	logger      *log.Helper
 
 	opts Options
 
-	// After this time, will no try lock(), default value 3*duration
+	// After this time, will no try dlock(), default value 3*duration
 	// lockOvertime = lockWaiting+ lockTime
 	lockOvertime time.Time
 	locked       bool
@@ -50,11 +49,11 @@ func (m *RedisMutex) Lock(ctx context.Context) error {
 	for {
 		cmd := m.redisClient.SetNX(ctx, m.opts.Key, m.lockID, m.opts.Duration)
 		if cmd.Err() != nil {
-			m.logger.Error(ctx, "lock fail. %s, redis error", m.opts.Key, cmd.Err())
+			m.logger.Errorf("dlock fail. %s, redis error", m.opts.Key, cmd.Err())
 		}
 
 		if cmd.Val() {
-			m.logger.Info(ctx, "lock success. %s,  %s ,cost: %dms", m.opts.Key, m.lockID, time.Now().Sub(lockStart).Milliseconds())
+			m.logger.Infof("dlock success. %s,  %s ,cost: %dms", m.opts.Key, m.lockID, time.Now().Sub(lockStart).Milliseconds())
 			m.locked = true
 			if m.opts.RetryInterval != RenewClose {
 				go m.watchDog(ctx)
@@ -66,7 +65,7 @@ func (m *RedisMutex) Lock(ctx context.Context) error {
 		time.Sleep(m.opts.RetryInterval)
 
 		if time.Now().UnixNano() > m.lockOvertime.UnixNano() {
-			m.logger.Error(ctx, "lock fail. %s err: lock timeout, cost: %dms", m.opts.Key, time.Now().Sub(lockStart).Milliseconds())
+			m.logger.Errorf("dlock fail. %s err: dlock timeout, cost: %dms", m.opts.Key, time.Now().Sub(lockStart).Milliseconds())
 			return ErrLockOvertime
 		}
 	}
@@ -76,16 +75,14 @@ func (m *RedisMutex) Lock(ctx context.Context) error {
 	return nil
 }
 
-//  Monitor whether the lock expires and automatically renew
+//  Monitor whether the dlock expires and automatically renew
 func (m *RedisMutex) watchDog(ctx context.Context) error {
-	m.logger.Info(ctx, "lock watch dog %s ", m.opts.Key)
+	m.logger.Infof("dlock watch dog %s ", m.opts.Key)
 
-	var err error
 	defer func() {
 		if r := recover(); r != nil {
 			msg := fmt.Sprintf("RedisMutex:watchDog panic %v", r)
-			err = errors.New(msg)
-			m.logger.Error(ctx, msg)
+			m.logger.Error(msg)
 		}
 	}()
 
@@ -106,9 +103,9 @@ func (m *RedisMutex) watchDog(ctx context.Context) error {
 		case <-t.C:
 			cmd := m.redisClient.Eval(ctx, script, []string{m.opts.Key}, m.lockID, strconv.Itoa(int(m.opts.Duration.Milliseconds())))
 			if cmd.Err() != nil {
-				m.logger.Error(ctx, "lock renew fail. %s, error :%v", m.opts.Key, cmd.Err())
+				m.logger.Errorf("lock renew fail. %s, error :%v", m.opts.Key, cmd.Err())
 			} else {
-				m.logger.Info(ctx, "lock renew success. %s, duration:%dms", m.opts.Key, int(m.opts.Duration.Milliseconds()))
+				m.logger.Infof("lock renew success. %s, duration:%dms", m.opts.Key, int(m.opts.Duration.Milliseconds()))
 			}
 
 			renew++
@@ -117,13 +114,11 @@ func (m *RedisMutex) watchDog(ctx context.Context) error {
 				return nil
 			}
 		case <-m.cancel:
-			m.logger.Info(ctx, "lock renew canceled . %s", m.opts.Key)
+			m.logger.Infof("lock renew canceled . %s", m.opts.Key)
 			t.Stop()
 			return nil
 		}
 	}
-
-	return err
 }
 
 func (m *RedisMutex) UnLock(ctx context.Context) {
@@ -143,19 +138,19 @@ func (m *RedisMutex) UnLock(ctx context.Context) {
 	cmd := m.redisClient.Eval(ctx, script, []string{m.opts.Key}, m.lockID)
 	err := cmd.Err()
 	if err != nil {
-		m.logger.Error(ctx, "unlock fail. %s, error :%v", m.opts.Key, err)
+		m.logger.Errorf("unlock fail. %s, error :%v", m.opts.Key, err)
 		return
 	}
 
 	m.locked = false
 
-	m.logger.Info(ctx, "unlock %s, result: %v ", m.opts.Key, cmd.Val())
+	m.logger.Infof("unlock %s, result: %v ", m.opts.Key, cmd.Val())
 	return
 }
 
 type redisMutexFactory struct {
 	redisClient *redis.Client
-	logger      logs.Logger
+	logger      *log.Helper
 	keyPrefix   string
 }
 
@@ -186,11 +181,11 @@ func (factory redisMutexFactory) New(opts Options) Mutex {
 	}
 }
 
-func NewRedisMutexFactory(logger logs.Logger, redisClient *redis.Client, keyPrefix string) Factory {
+func NewRedisMutexFactory(logger *log.Helper, redisClient *redis.Client, keyPrefix string) Factory {
 	if keyPrefix == "" {
 		keyPrefix = DefaultKeyPrefix
 	}
-	
+
 	return redisMutexFactory{
 		logger:      logger,
 		redisClient: redisClient,

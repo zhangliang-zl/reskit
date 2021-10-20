@@ -2,14 +2,13 @@ package redis
 
 import (
 	"context"
-	"fmt"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis/v8"
-	"github.com/zhangliang-zl/reskit/logs"
 	"time"
 )
 
 type logHook struct {
-	l logs.Logger
+	l *log.Helper
 }
 
 func (logHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
@@ -20,14 +19,14 @@ func (logHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Cont
 func (h logHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 	start := ctx.Value("redis-once-time").(int64)
 	elapsed := float64(time.Now().UnixNano()/1e3-start) / 1000
-	h.l.Info(ctx, fmt.Sprintf("%s usetime: %.3fms ", cmd.String(), elapsed))
+	h.l.Infof("%s cost time: %.3fms ", cmd.String(), elapsed)
 	return nil
 }
 
-func (logHook) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmder) (context.Context, error) {
+func (logHook) BeforeProcessPipeline(ctx context.Context, _ []redis.Cmder) (context.Context, error) {
 	return ctx, nil
 }
 
-func (logHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder) error {
+func (logHook) AfterProcessPipeline(_ context.Context, _ []redis.Cmder) error {
 	return nil
 }

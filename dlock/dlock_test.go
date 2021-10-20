@@ -1,9 +1,8 @@
-package lock
+package dlock
 
 import (
 	"context"
-	"github.com/zhangliang-zl/reskit/logs"
-	"github.com/zhangliang-zl/reskit/logs/driver/stdout"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/zhangliang-zl/reskit/redis"
 	"sync"
 	"testing"
@@ -13,15 +12,15 @@ import (
 var factory Factory
 
 func init() {
-	loggerFactory := logs.NewFactory(logs.LevelWarn, stdout.Driver())
-	redisLogger, _ := loggerFactory.Get("redis")
+
+	var redisLogger = log.NewHelper(log.DefaultLogger, log.WithMessageKey("redis"))
 	kvStore, _ := redis.New(redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
 	}, redisLogger)
 
-	mutexLogger, _ := loggerFactory.Get("mutex")
+	var mutexLogger = log.NewHelper(log.DefaultLogger, log.WithMessageKey("mutex"))
 	factory = NewRedisMutexFactory(mutexLogger, kvStore, "")
 }
 
@@ -55,6 +54,6 @@ func TestRedisMutex(t *testing.T) {
 	w.Wait()
 
 	if time.Now().Sub(start) < time.Duration(int(workTime)*concurrentNum) {
-		t.Error("Concurrent lock fail")
+		t.Error("Concurrent dlock fail")
 	}
 }

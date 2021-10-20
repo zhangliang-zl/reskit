@@ -1,9 +1,9 @@
-package mq
+package beanstalkMQ
 
 import (
 	"context"
 	"github.com/beanstalkd/go-beanstalk"
-	"github.com/zhangliang-zl/reskit/logs"
+	"github.com/go-kratos/kratos/v2/log"
 	"strconv"
 	"sync"
 	"time"
@@ -30,13 +30,13 @@ func (store tubeStore) getTube(topic string, client *beanstalk.Conn) *beanstalk.
 	return tube
 }
 
-func (q *beanstalkQueue) Push(ctx context.Context, topic string, body []byte, delay time.Duration) error {
+func (q *beanstalkQueue) Push(_ context.Context, topic string, body []byte, delay time.Duration) error {
 	t := q.getTube(topic, q.client)
 	_, err := t.Put(body, MinPriority, delay, MaxWorkingTTL)
 	return err
 }
 
-func (q *beanstalkQueue) Fetch(ctx context.Context, topic string, timeout time.Duration) (body []byte, ask AskFunc, err error) {
+func (q *beanstalkQueue) Fetch(_ context.Context, topic string, timeout time.Duration) (body []byte, ask AskFunc, err error) {
 	tube := beanstalk.NewTubeSet(q.client, topic)
 	jobID, body, err := tube.Reserve(timeout)
 	if err != nil {
@@ -94,7 +94,7 @@ const (
 )
 
 type beanstalkService struct {
-	logger   logs.Logger
+	logger   *log.Helper
 	stopChan chan bool
 }
 
@@ -114,27 +114,27 @@ loop:
 
 			if err != nil {
 				if err.Error() == "reserve-with-timeout: timeout" {
-					svc.logger.Info(ctx, "%s  no data .", topic)
+					svc.logger.Infof("%s  no data .", topic)
 				} else {
-					svc.logger.Error(ctx, " %s fetch error: %s", topic, err.Error())
+					svc.logger.Errorf(" %s fetch error: %s", topic, err.Error())
 				}
 				continue loop
 			}
 
 			err = consumer.Do(ctx, data)
 			if err != nil {
-				svc.logger.Error(ctx, "%s consumer do err %s", topic, err.Error())
+				svc.logger.Errorf("%s consumer do err %s", topic, err.Error())
 			}
 
 			if err := callback(err); err != nil {
-				svc.logger.Error(ctx, "%s callback error %s", topic, err.Error())
+				svc.logger.Errorf("%s callback error %s", topic, err.Error())
 			}
 			break
 		}
 	}
 }
 
-func NewBeanstalkService(logger logs.Logger) Service {
+func NewBeanstalkService(logger *log.Helper) Service {
 	return &beanstalkService{
 		logger:   logger,
 		stopChan: make(chan bool),

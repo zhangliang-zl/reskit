@@ -2,8 +2,7 @@ package cache
 
 import (
 	"context"
-	"github.com/zhangliang-zl/reskit/logs"
-	"github.com/zhangliang-zl/reskit/logs/driver/stdout"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/zhangliang-zl/reskit/redis"
 	"testing"
 	"time"
@@ -13,9 +12,9 @@ var redisCache Cache
 var memoryCache Cache
 
 func init() {
-	loggerFactory := logs.NewFactory(logs.LevelWarn, stdout.Driver())
-	redisLogger, _ := loggerFactory.Get("redis")
-	cacheLogger, _ := loggerFactory.Get("cache")
+
+	var redisLogger = log.NewHelper(log.DefaultLogger, log.WithMessageKey("redis"))
+	var cacheLogger = log.NewHelper(log.DefaultLogger, log.WithMessageKey("cache"))
 	kvStore, _ := redis.New(redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",

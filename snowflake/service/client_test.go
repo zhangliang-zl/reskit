@@ -1,15 +1,13 @@
 package service
 
 import (
-	"github.com/zhangliang-zl/reskit/logs"
-	"github.com/zhangliang-zl/reskit/logs/driver/stdout"
+	"github.com/go-kratos/kratos/v2/log"
 	"testing"
 	"time"
 )
 
 func startServer(opts ServerOptions) error {
-	loggerFac := logs.NewFactory(logs.LevelWarn, stdout.Driver())
-	logger, _ := loggerFac.Get("uuid")
+	var logger = log.NewHelper(log.DefaultLogger, log.WithMessageKey("uuid"))
 	ser, err := NewServer(opts, logger)
 	if err != nil {
 		return err
