@@ -17,19 +17,19 @@ type Cache struct {
 	mutexStore *sync.Map
 }
 
-func (m *Cache) getLocker(key string) *sync.Mutex {
-	lock, ok := m.mutexStore.Load(key)
+func (c *Cache) getLocker(key string) *sync.Mutex {
+	lock, ok := c.mutexStore.Load(key)
 	if ok {
 		return lock.(*sync.Mutex)
 	}
 
 	l := new(sync.Mutex)
-	m.mutexStore.Store(key, l)
+	c.mutexStore.Store(key, l)
 	return l
 }
 
-func (m *Cache) Get(ctx context.Context, key string, val interface{}) (bool, error) {
-	b, err := m.freeCache.Get([]byte(key))
+func (c *Cache) Get(ctx context.Context, key string, val interface{}) (bool, error) {
+	b, err := c.freeCache.Get([]byte(key))
 	if err != nil && err != freecache.ErrNotFound {
 		return false, err
 	}
@@ -46,17 +46,17 @@ func (m *Cache) Get(ctx context.Context, key string, val interface{}) (bool, err
 	return true, nil
 }
 
-func (m *Cache) Set(ctx context.Context, key string, val interface{}, ttl time.Duration) error {
+func (c *Cache) Set(ctx context.Context, key string, val interface{}, ttl time.Duration) error {
 	data, err := msgpack.Marshal(val)
 	if err != nil {
 		return err
 	}
 
-	return m.freeCache.Set([]byte(key), data, int(ttl.Seconds()))
+	return c.freeCache.Set([]byte(key), data, int(ttl.Seconds()))
 }
 
-func (m *Cache) Delete(ctx context.Context, key string) error {
-	affected := m.freeCache.Del([]byte(key))
+func (c *Cache) Delete(ctx context.Context, key string) error {
+	affected := c.freeCache.Del([]byte(key))
 	if affected {
 		return nil
 	}
@@ -64,7 +64,7 @@ func (m *Cache) Delete(ctx context.Context, key string) error {
 	return errors.New(fmt.Sprintf("Delete fail, No key %s", key))
 }
 
-func (m *Cache) GetOrSet(ctx context.Context, key string, val interface{}, ttl time.Duration, callback func() (interface{}, error)) (err error) {
+func (c *Cache) GetOrSet(ctx context.Context, key string, val interface{}, ttl time.Duration, callback func() (interface{}, error)) (err error) {
 
 	// When ttl<=0: callback() and return
 	if ttl <= 0 {
@@ -78,7 +78,7 @@ func (m *Cache) GetOrSet(ctx context.Context, key string, val interface{}, ttl t
 	keyByte := []byte(key)
 
 	// Get check Is Hit
-	data, err := m.freeCache.Get(keyByte)
+	data, err := c.freeCache.Get(keyByte)
 
 	if err == nil {
 		return msgpack.Unmarshal(data, val)
@@ -89,13 +89,13 @@ func (m *Cache) GetOrSet(ctx context.Context, key string, val interface{}, ttl t
 	}
 
 	// Key Not exist: callback() and set val
-	lock := m.getLocker("Cache:" + key)
+	lock := c.getLocker("Cache:" + key)
 
 	lock.Lock()
 	defer lock.Unlock()
 
 	// Confirm again after getting the redislock
-	data, err = m.freeCache.Get(keyByte)
+	data, err = c.freeCache.Get(keyByte)
 	if len(data) > 0 {
 		return msgpack.Unmarshal(data, val)
 	}
@@ -111,7 +111,7 @@ func (m *Cache) GetOrSet(ctx context.Context, key string, val interface{}, ttl t
 		return err
 	}
 
-	err = m.freeCache.Set(keyByte, p, int(ttl.Seconds()))
+	err = c.freeCache.Set(keyByte, p, int(ttl.Seconds()))
 	if err != nil {
 		return err
 	}

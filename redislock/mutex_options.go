@@ -10,10 +10,10 @@ const (
 )
 
 type Options struct {
-	Duration      time.Duration // default 10s
-	LockWaiting   time.Duration // default 30s
-	RetryInterval time.Duration // default 50ms
-	KeyPrefix     string        // redis key prefix
+	Duration      time.Duration
+	LockWaiting   time.Duration
+	RetryInterval time.Duration
+	KeyPrefix     string
 }
 
 type Option func(o *Options)

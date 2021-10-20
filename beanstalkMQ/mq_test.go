@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var q, _ = NewBeanstalkQueue("localhost:11300")
+var q, _ = NewQueue("localhost:11300")
 
 var logger  = log.NewHelper(log.DefaultLogger)
 var runTimes = 0
@@ -58,7 +58,7 @@ func TestQueueSvc(t *testing.T) {
 	for i := 0; i < 50; i++ {
 		in := Raw{
 			Id:   i,
-			Name: "beanstalkService",
+			Name: "service",
 			Data: "data_svc",
 		}
 		data, _ := json.Marshal(in)

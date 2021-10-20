@@ -8,9 +8,9 @@ import (
 )
 
 type Options struct {
-	Addr     string `json:"addr"`
-	Password string `json:"password"`
-	DB       int    `json:"db"`
+	Addr     string
+	Password string
+	DB       int
 	Logger   *log.Helper
 }
 
