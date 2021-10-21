@@ -12,48 +12,48 @@ var (
 	DefaultConnMaxLifetime = 300 * time.Second
 	DefaultConnMaxIdleTime = 300 * time.Second
 	DefaultDisableAutoPing = true
-	DefaultLogger          = log.NewHelper(log.DefaultLogger, log.WithMessageKey("db"))
+	DefaultLogger          = log.NewHelper(log.With(log.DefaultLogger, "tag", "db"))
 )
 
 type Option func(options *Options)
 
-func WithMaxOPenConns(num int) Option {
+func MaxOPenConns(num int) Option {
 	return func(c *Options) {
 		c.maxOpenConns = num
 	}
 }
 
-func WithMaxIdleConns(num int) Option {
+func MaxIdleConns(num int) Option {
 	return func(c *Options) {
 		c.maxIdleConns = num
 	}
 }
 
-func WithSlowThreshold(duration time.Duration) Option {
+func SlowThreshold(duration time.Duration) Option {
 	return func(c *Options) {
 		c.slowThreshold = duration
 	}
 }
 
-func WithConnMaxLifetime(duration time.Duration) Option {
+func ConnMaxLifetime(duration time.Duration) Option {
 	return func(c *Options) {
 		c.connMaxLifetime = duration
 	}
 }
 
-func WithConnMaxIdleTime(duration time.Duration) Option {
+func ConnMaxIdleTime(duration time.Duration) Option {
 	return func(c *Options) {
 		c.connMaxIdleTime = duration
 	}
 }
 
-func WithDisableAutoPing(close bool) Option {
+func DisableAutoPing(close bool) Option {
 	return func(c *Options) {
 		c.disableAutoPing = close
 	}
 }
 
-func WithLogger(logger *log.Helper) Option {
+func Logger(logger *log.Helper) Option {
 	return func(c *Options) {
 		c.Logger = logger
 	}

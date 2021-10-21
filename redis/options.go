@@ -6,30 +6,30 @@ var DefaultOption = &Options{
 	addr:     "127.0.0.1:6379",
 	password: "",
 	dbNum:    0,
-	logger:   log.NewHelper(log.DefaultLogger, log.WithMessageKey("redis")),
+	logger:   log.NewHelper(log.With(log.DefaultLogger, "tag", "redis")),
 }
 
 type Option func(options *Options)
 
-func WithLogger(logger *log.Helper) Option {
+func Logger(logger *log.Helper) Option {
 	return func(o *Options) {
 		o.logger = logger
 	}
 }
 
-func WithAddress(address string) Option {
+func Address(address string) Option {
 	return func(o *Options) {
 		o.addr = address
 	}
 }
 
-func WithPassword(pass string) Option {
+func Password(pass string) Option {
 	return func(o *Options) {
 		o.password = pass
 	}
 }
 
-func WithDbNum(dbNum int) Option {
+func DbNum(dbNum int) Option {
 	return func(o *Options) {
 		o.dbNum = dbNum
 	}

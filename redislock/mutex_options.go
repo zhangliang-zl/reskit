@@ -18,25 +18,25 @@ type Options struct {
 
 type Option func(o *Options)
 
-func WithKeyPrefix(prefix string) Option {
+func KeyPrefix(prefix string) Option {
 	return func(o *Options) {
 		o.keyPrefix = prefix
 	}
 }
 
-func WithRetryInterval(duration time.Duration) Option {
+func RetryInterval(duration time.Duration) Option {
 	return func(o *Options) {
 		o.retryInterval = duration
 	}
 }
 
-func WithLockWaiting(duration time.Duration) Option {
+func LockWaiting(duration time.Duration) Option {
 	return func(o *Options) {
 		o.lockWaiting = duration
 	}
 }
 
-func WithLockTime(duration time.Duration) Option {
+func LockTime(duration time.Duration) Option {
 	return func(o *Options) {
 		o.duration = duration
 	}

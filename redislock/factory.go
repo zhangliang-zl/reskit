@@ -5,7 +5,7 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-var DefaultLogger = log.NewHelper(log.DefaultLogger, log.WithMessageKey("lock"))
+var DefaultLogger = log.NewHelper(log.With(log.DefaultLogger, "tag", "lock"))
 
 type FactoryOption func(factory *Factory)
 

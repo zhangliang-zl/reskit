@@ -8,11 +8,11 @@ import (
 )
 
 func main() {
-	logger := log.NewHelper(log.DefaultLogger, log.WithMessageKey("redis"))
+	logger := log.NewHelper(log.With(log.DefaultLogger, "tag", "redis"))
 	rds, _ := redis.New(
-		redis.WithLogger(logger),
-		redis.WithPassword(""),
-		redis.WithDbNum(2),
+		redis.Logger(logger),
+		redis.Password(""),
+		redis.DbNum(2),
 	)
 	ctx := context.Background()
 	rds.Set(ctx, "a", "1", time.Second*0)

@@ -1,4 +1,4 @@
-package beanstalkMQ
+package mq
 
 import (
 	"context"

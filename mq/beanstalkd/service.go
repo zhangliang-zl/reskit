@@ -1,11 +1,11 @@
-package beanstalkMQ
+package mq
 
 import (
 	"context"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/zhangliang-zl/reskit/mq"
 	"time"
 )
-
 
 type service struct {
 	logger   *log.Helper
@@ -16,7 +16,7 @@ func (svc *service) Stop() {
 	svc.stopChan <- true
 }
 
-func (svc *service) Serving(ctx context.Context, topic string, queue Queue, consumer Consumer, fetchTimeout time.Duration) {
+func (svc *service) Serving(ctx context.Context, topic string, queue mq.Queue, consumer mq.Consumer, fetchTimeout time.Duration) {
 
 loop:
 	for {
@@ -48,7 +48,7 @@ loop:
 	}
 }
 
-func NewBeanstalkService(logger *log.Helper) Service {
+func NewService(logger *log.Helper) mq.Service {
 	return &service{
 		logger:   logger,
 		stopChan: make(chan bool),

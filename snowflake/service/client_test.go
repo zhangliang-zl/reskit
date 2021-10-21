@@ -7,7 +7,7 @@ import (
 )
 
 func startServer(opts ServerOptions) error {
-	var logger = log.NewHelper(log.DefaultLogger, log.WithMessageKey("uuid"))
+	logger := log.NewHelper(log.With(log.DefaultLogger, "tag", "uuid"))
 	ser, err := NewServer(opts, logger)
 	if err != nil {
 		return err

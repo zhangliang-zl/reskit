@@ -27,7 +27,7 @@ func TestRedisMutex(t *testing.T) {
 		go func() {
 			ctx := context.Background()
 			locker := factory.New("testKey",
-				WithLockTime(time.Second),
+				LockTime(time.Second),
 				LockWaiting(time.Second*30),
 			)
 			err := locker.Lock(ctx)

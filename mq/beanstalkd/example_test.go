@@ -1,4 +1,4 @@
-package beanstalkMQ
+package mq
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 
 var q, _ = NewQueue("localhost:11300")
 
-var logger  = log.NewHelper(log.DefaultLogger)
+var logger = log.NewHelper(log.DefaultLogger)
 var runTimes = 0
 
 func TestQueueBasic(t *testing.T) {
@@ -48,7 +48,7 @@ func TestQueueSvc(t *testing.T) {
 	wg := sync.WaitGroup{}
 	c := &testConsumer{}
 
-	qSvc := NewBeanstalkService(logger)
+	qSvc := NewService(logger)
 	wg.Add(1)
 	go func() {
 		qSvc.Serving(ctx, topic, q, c, time.Second*3)

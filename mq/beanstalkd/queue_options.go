@@ -1,4 +1,4 @@
-package beanstalkMQ
+package mq
 
 import "time"
 
@@ -18,25 +18,25 @@ type Options struct {
 
 type Option func(o *Options)
 
-func WithMinPriority(prior uint32) Option {
+func MinPriority(prior uint32) Option {
 	return func(c *Options) {
 		c.minPriority = prior
 	}
 }
 
-func WithMaxPriority(prior uint32) Option {
+func MaxPriority(prior uint32) Option {
 	return func(c *Options) {
 		c.maxPriority = prior
 	}
 }
 
-func WithWorkingTTL(duration time.Duration) Option {
+func WorkingTTL(duration time.Duration) Option {
 	return func(c *Options) {
 		c.maxWorkingTTL = duration
 	}
 }
 
-func WithFailRetryDelay(duration time.Duration) Option {
+func FailRetryDelay(duration time.Duration) Option {
 	return func(c *Options) {
 		c.failRetryDelay = duration
 	}

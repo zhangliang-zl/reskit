@@ -102,7 +102,7 @@ func (v *Validator) parseResult(err error) Result {
 			}
 		}
 
-		// validation errors
+		// validation httperror
 		validErrors, ok := err.(validator.ValidationErrors)
 		if ok {
 			errs := validErrors.Translate(v.translator)
