@@ -23,7 +23,7 @@ type ServerList struct {
 	addrs []net.Addr
 }
 
-// staticAddr caches the Network() and String() values from any net.Addr.
+// staticAddr caches the Network() and String() values from any net.addr.
 type staticAddr struct {
 	ntw, str string
 }

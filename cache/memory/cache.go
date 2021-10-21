@@ -123,17 +123,6 @@ func (c *Cache) init() {
 	c.freeCache = freecache.NewCache(c.size)
 }
 
-type Option func(c *Cache)
-
-// DefaultSize is 64M
-const DefaultSize = 64 * 1024 * 1024
-
-func Size(size int) Option {
-	return func(c *Cache) {
-		c.size = size
-	}
-}
-
 func NewCache(opts ...Option) cache.Cache {
 	c := &Cache{
 		size:       DefaultSize,

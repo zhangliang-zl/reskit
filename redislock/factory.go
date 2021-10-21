@@ -34,10 +34,10 @@ type Factory struct {
 
 func (f *Factory) New(key string, opts ...Option) *Mutex {
 	var o = &Options{
-		Duration:      DefaultLocked,
-		LockWaiting:   DefaultLockWaiting,
-		RetryInterval: DefaultRetryInterval,
-		KeyPrefix:     DefaultKeyPrefix,
+		duration:      DefaultLocked,
+		lockWaiting:   DefaultLockWaiting,
+		retryInterval: DefaultRetryInterval,
+		keyPrefix:     DefaultKeyPrefix,
 	}
 
 	for _, opt := range opts {
@@ -48,6 +48,6 @@ func (f *Factory) New(key string, opts ...Option) *Mutex {
 		redisClient: f.rdsClient,
 		logger:      f.logger,
 		opts:        o,
-		key:         o.KeyPrefix + key,
+		key:         o.keyPrefix + key,
 	}
 }

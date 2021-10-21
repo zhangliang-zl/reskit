@@ -32,7 +32,7 @@ func (store tubeStore) getTube(topic string, client *beanstalk.Conn) *beanstalk.
 
 func (q *queue) Push(_ context.Context, topic string, body []byte, delay time.Duration) error {
 	t := q.getTube(topic, q.client)
-	_, err := t.Put(body, q.opts.MinPriority, delay, q.opts.MaxWorkingTTL)
+	_, err := t.Put(body, q.opts.minPriority, delay, q.opts.maxWorkingTTL)
 	return err
 }
 
@@ -62,33 +62,17 @@ func (q *queue) buildAskFunc(jobID uint64) AskFunc {
 
 		priInt, _ := strconv.Atoi(stat["pri"])
 		pri := uint32(priInt)
-		if pri <= q.opts.MinPriority {
-			pri = q.opts.MinPriority
+		if pri <= q.opts.minPriority {
+			pri = q.opts.minPriority
 		}
 		pri++
-		if pri >= q.opts.MinPriority {
-			pri = q.opts.MaxPriority
+		if pri >= q.opts.minPriority {
+			pri = q.opts.maxPriority
 		}
 
-		return q.client.Release(jobID, pri, q.opts.FailRetryDelay)
+		return q.client.Release(jobID, pri, q.opts.failRetryDelay)
 	}
 }
-
-const (
-	DefaultMinPriority    uint32 = 1024
-	DefaultMaxPriority    uint32 = 2048
-	DefaultMaxWorkingTTL         = time.Second * 120
-	DefaultFailRetryDelay        = time.Second * 10
-)
-
-type Options struct {
-	MinPriority    uint32
-	MaxPriority    uint32
-	MaxWorkingTTL  time.Duration
-	FailRetryDelay time.Duration
-}
-
-type Option func(o *Options)
 
 func NewQueue(addr string, opts ...Option) (Queue, error) {
 	conn, err := beanstalk.Dial("tcp", addr)
@@ -98,10 +82,14 @@ func NewQueue(addr string, opts ...Option) (Queue, error) {
 	}
 
 	o := &Options{
-		MinPriority:    DefaultMinPriority,
-		MaxPriority:    DefaultMaxPriority,
-		MaxWorkingTTL:  DefaultMaxWorkingTTL,
-		FailRetryDelay: DefaultFailRetryDelay,
+		minPriority:    DefaultMinPriority,
+		maxPriority:    DefaultMaxPriority,
+		maxWorkingTTL:  DefaultMaxWorkingTTL,
+		failRetryDelay: DefaultFailRetryDelay,
+	}
+
+	for _, opt := range opts {
+		opt(o)
 	}
 
 	return &queue{

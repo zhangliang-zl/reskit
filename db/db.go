@@ -9,44 +9,32 @@ import (
 )
 
 type Options struct {
-	MaxOpenConns         int
-	MaxIdleConns         int
-	ConnMaxLifetime      time.Duration
-	ConnMaxIdleTime      time.Duration
-	SlowThreshold        time.Duration
-	DisableAutomaticPing bool
-	Logger               *log.Helper
+	maxOpenConns    int
+	maxIdleConns    int
+	connMaxLifetime time.Duration
+	connMaxIdleTime time.Duration
+	slowThreshold   time.Duration
+	disableAutoPing bool
+	Logger          *log.Helper
 }
-
-var (
-	DefaultMaxOpenConns         = 100
-	DefaultMaxIdleConns         = 100
-	DefaultSlowThreshold        = 100 * time.Millisecond
-	DefaultConnMaxLifetime      = 300 * time.Second
-	DefaultConnMaxIdleTime      = 300 * time.Second
-	DefaultDisableAutomaticPing = true
-	DefaultLogger               = log.NewHelper(log.DefaultLogger, log.WithMessageKey("db"))
-)
-
-type Option func(options *Options)
 
 func New(dsn string, opts ...Option) (*gorm.DB, error) {
 
 	o := &Options{
-		MaxOpenConns:         DefaultMaxOpenConns,
-		MaxIdleConns:         DefaultMaxIdleConns,
-		ConnMaxIdleTime:      DefaultConnMaxIdleTime,
-		ConnMaxLifetime:      DefaultConnMaxLifetime,
-		SlowThreshold:        DefaultSlowThreshold,
-		DisableAutomaticPing: DefaultDisableAutomaticPing,
-		Logger:               DefaultLogger,
+		maxOpenConns:    DefaultMaxOpenConns,
+		maxIdleConns:    DefaultMaxIdleConns,
+		connMaxIdleTime: DefaultConnMaxIdleTime,
+		connMaxLifetime: DefaultConnMaxLifetime,
+		slowThreshold:   DefaultSlowThreshold,
+		disableAutoPing: DefaultDisableAutoPing,
+		Logger:          DefaultLogger,
 	}
 
 	for _, opt := range opts {
 		opt(o)
 	}
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{DisableAutomaticPing: o.DisableAutomaticPing})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{DisableAutomaticPing: o.disableAutoPing})
 	if err != nil {
 		return nil, err
 	}
@@ -56,13 +44,14 @@ func New(dsn string, opts ...Option) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	sqlDB.SetMaxOpenConns(o.MaxOpenConns)
-	sqlDB.SetMaxIdleConns(o.MaxIdleConns)
-	sqlDB.SetConnMaxLifetime(o.ConnMaxIdleTime)
+	sqlDB.SetMaxOpenConns(o.maxOpenConns)
+	sqlDB.SetMaxIdleConns(o.maxIdleConns)
+	sqlDB.SetConnMaxLifetime(o.connMaxIdleTime)
 
 	db.Logger = newTraceLogger(o.Logger, gormlogger.Config{
-		SlowThreshold: o.SlowThreshold,
+		SlowThreshold: o.slowThreshold,
 		LogLevel:      gormlogger.Info,
 	})
+
 	return db, nil
 }

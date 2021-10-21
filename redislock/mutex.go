@@ -32,11 +32,11 @@ func (m *Mutex) Lock(ctx context.Context) error {
 	}
 
 	start := time.Now()
-	m.lockOvertime = start.Add(m.opts.LockWaiting)
+	m.lockOvertime = start.Add(m.opts.lockWaiting)
 	m.lockID = uniqueID()
 
 	for {
-		cmd := m.redisClient.SetNX(ctx, m.key, m.lockID, m.opts.Duration)
+		cmd := m.redisClient.SetNX(ctx, m.key, m.lockID, m.opts.duration)
 		if cmd.Err() == redis.ErrClosed {
 			m.logger.Errorf("lock fail. %s, redis close", m.key)
 			return redis.ErrClosed
@@ -54,7 +54,7 @@ func (m *Mutex) Lock(ctx context.Context) error {
 			return nil
 		}
 
-		time.Sleep(m.opts.RetryInterval)
+		time.Sleep(m.opts.retryInterval)
 
 		if time.Now().UnixNano() > m.lockOvertime.UnixNano() {
 			m.logger.Errorf("lock fail. %s err: lock timeout, cost: %dms", m.key, time.Now().Sub(start).Milliseconds())

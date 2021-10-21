@@ -8,49 +8,35 @@ import (
 )
 
 type Options struct {
-	Addr     string
-	Password string
-	DB       int
-	Logger   *log.Helper
+	addr     string
+	password string
+	dbNum    int
+	logger   *log.Helper
 }
 
-var (
-	DefaultAddress  = "127.0.0.1:6379"
-	DefaultDB       = 0
-	DefaultPassword = ""
-	DefaultLogger   = log.NewHelper(log.DefaultLogger, log.WithMessageKey("redis"))
-)
-
-type Option func(options *Options)
-
 func New(opts ...Option) (*redis.Client, error) {
-	o := &Options{
-		Addr:     DefaultAddress,
-		DB:       DefaultDB,
-		Password: DefaultPassword,
-		Logger:   DefaultLogger,
-	}
+	o := DefaultOption
 
 	for _, opt := range opts {
 		opt(o)
 	}
 
 	client := redis.NewClient(&redis.Options{
-		Addr:     o.Addr,
-		Password: o.Password,
-		DB:       o.DB,
+		Addr:     o.addr,
+		Password: o.password,
+		DB:       o.dbNum,
 	})
 
-	ctx, cancel := context.WithTimeout(context.TODO(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 	defer cancel()
 
 	if _, err := client.Ping(ctx).Result(); err != nil {
 		return client, err
 	}
 
-	redis.SetLogger(&logWriter{l: o.Logger})
+	redis.SetLogger(&logWriter{l: o.logger})
 	client.AddHook(logHook{
-		l: o.Logger,
+		l: o.logger,
 	})
 	return client, nil
 }

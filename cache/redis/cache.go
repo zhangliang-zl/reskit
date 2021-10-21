@@ -144,23 +144,6 @@ func (c *Cache) buildKey(key string) string {
 	return c.keyPrefix + md5Key
 }
 
-const DefaultKeyPrefix = "Caching:"
-
-var DefaultLogger = log.NewHelper(log.DefaultLogger, log.WithMessageKey("redis"))
-
-type Option func(c *Cache)
-
-func Prefix(key string) Option {
-	return func(c *Cache) {
-		c.keyPrefix = key
-	}
-}
-
-func Logger(logger *log.Helper) Option {
-	return func(c *Cache) {
-		c.logger = logger
-	}
-}
 
 func NewCache(client *redis.Client, lockFactory *redislock.Factory, opts ...Option) cache.Cache {
 	c := &Cache{
