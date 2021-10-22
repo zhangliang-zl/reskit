@@ -9,7 +9,7 @@ type Server interface {
 }
 
 type server struct {
-	ref   interface{}
+	obj   interface{}
 	start func(ctx context.Context) error
 	stop  func(ctx context.Context) error
 }
@@ -23,12 +23,12 @@ func (s *server) Stop(ctx context.Context) error {
 }
 
 func (s *server) Get() interface{} {
-	return s.ref
+	return s.obj
 }
 
-func NewService(ref interface{}, start, stop func(ctx context.Context) error) Server {
+func BuildServer(obj interface{}, start, stop func(ctx context.Context) error) Server {
 	return &server{
-		ref:   ref,
+		obj:   obj,
 		start: start,
 		stop:  stop,
 	}
