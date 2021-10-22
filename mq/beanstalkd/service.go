@@ -12,8 +12,9 @@ type service struct {
 	stopChan chan bool
 }
 
-func (svc *service) Stop() {
+func (svc *service) Stop() error {
 	svc.stopChan <- true
+	return nil
 }
 
 func (svc *service) Serving(ctx context.Context, topic string, queue mq.Queue, consumer mq.Consumer, fetchTimeout time.Duration) {
@@ -28,7 +29,7 @@ loop:
 
 			if err != nil {
 				if err.Error() == "reserve-with-timeout: timeout" {
-					svc.logger.Infof("%s  no data .", topic)
+					svc.logger.Infof("%s no data .", topic)
 				} else {
 					svc.logger.Errorf(" %s fetch error: %s", topic, err.Error())
 				}

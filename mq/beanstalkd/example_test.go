@@ -14,7 +14,7 @@ import (
 
 var q, _ = NewQueue("localhost:11300")
 
-var logger = log.NewHelper(log.DefaultLogger)
+var logger = log.NewHelper(log.With(log.DefaultLogger, "tag", "beanstalk"))
 var runTimes = 0
 
 func TestQueueBasic(t *testing.T) {

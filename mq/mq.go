@@ -16,10 +16,10 @@ type AskFunc func(error) error
 // Service interface define  queue abstract
 type Service interface {
 	Serving(ctx context.Context, topic string, queue Queue, consumer Consumer, fetchTimeout time.Duration)
-	Stop()
+	Stop() error
 }
 
-// Consumer user define self
+// Consumer  user self define
 type Consumer interface {
 	Do(ctx context.Context, raw []byte) error
 }
