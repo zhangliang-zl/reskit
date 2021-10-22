@@ -11,7 +11,7 @@ import (
 func Logging(logger *log.Helper) web.HandlerFunc {
 	return func(c *web.Context) {
 		params := ""
-		if c.ContentType() == "application/json" {
+		if c.ContentType() == "app/json" {
 			body, _ := ioutil.ReadAll(c.Request.Body)
 			c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 			params += string(body)
