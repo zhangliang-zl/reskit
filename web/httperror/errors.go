@@ -26,7 +26,7 @@ func New(code int, msg string) Error {
 
 const (
 	MsgNotFound         = "404 not found"
-	MsgInternalError    = "500 server internal error"
+	MsgInternalError    = "500 web internal error"
 	MsgMethodNotAllowed = "405 method not allowed"
 	MsgForbidden        = "403 forbidden"
 	MsgBadRequest       = "400 bad request "

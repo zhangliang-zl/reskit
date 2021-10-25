@@ -1,10 +1,10 @@
-package server
+package web
 
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/zhangliang-zl/reskit/application"
-	"github.com/zhangliang-zl/reskit/server/httperror"
+	"github.com/zhangliang-zl/reskit"
+	"github.com/zhangliang-zl/reskit/web/httperror"
 	"net/http"
 	"sync"
 )
@@ -41,18 +41,18 @@ func (s *Server) WrapPProf() {
 	WrapPProf(s.Engine)
 }
 
-func (s *Server) Stop(ctx context.Context) error {
+func (s *Server) Stop(_ context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	err := s.httpServer.Shutdown(context.Background())
 	if err != nil {
-		s.opts.logger.Errorf("server shutdown error :%s", err.Error())
+		s.opts.logger.Errorf("web shutdown error :%s", err.Error())
 	}
 
 	return err
 }
 
-func (s *Server) Start(ctx context.Context) error {
+func (s *Server) Start(_ context.Context) error {
 	s.mu.Lock()
 	s.httpServer = &http.Server{
 		Addr:         s.opts.address,
@@ -61,10 +61,10 @@ func (s *Server) Start(ctx context.Context) error {
 		WriteTimeout: s.opts.writeTimeout,
 	}
 	s.mu.Unlock()
-	s.opts.logger.Info("server start running")
+	s.opts.logger.Info("web start running")
 	err := s.httpServer.ListenAndServe()
 	if err != nil {
-		s.opts.logger.Errorf("server run error :%s", err.Error())
+		s.opts.logger.Errorf("run error :%s", err.Error())
 	}
 	return err
 }
@@ -112,4 +112,4 @@ func noMethod(c *gin.Context) {
 }
 
 // 屏蔽编辑器报错信息
-var _ application.Server = (*Server)(nil)
+var _ reskit.Server = (*Server)(nil)

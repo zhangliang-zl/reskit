@@ -1,8 +1,8 @@
-package server
+package web
 
 import (
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/zhangliang-zl/reskit/server/httperror"
+	"github.com/zhangliang-zl/reskit/web/httperror"
 	"runtime"
 )
 

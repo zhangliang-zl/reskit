@@ -1,4 +1,4 @@
-package application
+package reskit
 
 import "context"
 

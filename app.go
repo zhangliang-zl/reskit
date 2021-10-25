@@ -1,4 +1,4 @@
-package application
+package reskit
 
 import (
 	"context"
@@ -11,13 +11,22 @@ import (
 	"syscall"
 )
 
-type Application struct {
-	opts *Options
+type App struct {
+	opts   *Options
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
-func (a *Application) Run() error {
-	ctx := context.Background()
-	eg, ctx := errgroup.WithContext(ctx)
+func (a *App) Run() error {
+	if len(a.opts.beforeStart) > 0 {
+		for _, fn := range a.opts.beforeStart {
+			if err := fn(); err != nil {
+				return err
+			}
+		}
+	}
+
+	eg, ctx := errgroup.WithContext(a.ctx)
 	wg := sync.WaitGroup{}
 	for _, srv := range a.opts.servers {
 		srv := srv
@@ -33,6 +42,14 @@ func (a *Application) Run() error {
 	}
 
 	wg.Wait()
+
+	if len(a.opts.afterStart) > 0 {
+		for _, fn := range a.opts.afterStart {
+			if err := fn(); err != nil {
+				return err
+			}
+		}
+	}
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, a.opts.sigs...)
@@ -50,27 +67,50 @@ func (a *Application) Run() error {
 			}
 		}
 	})
+
 	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return err
 	}
+
+	if len(a.opts.afterStop) > 0 {
+		for _, fn := range a.opts.afterStop {
+			if err := fn(); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
-func (a *Application) Stop() error {
+func (a *App) Stop() error {
+	a.cancel()
+
+	for _, fn := range a.opts.beforeStop {
+		if err := fn(); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
-func New(opts ...Option) *Application {
+func New(opts ...Option) *App {
 	o := &Options{
 		env:     "dev",
 		sigs:    []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		logger:  log.NewHelper(log.With(log.DefaultLogger, "tag", "app")),
 		servers: make([]Server, 0),
+		ctx:     context.Background(),
 	}
-
 	for _, opt := range opts {
 		opt(o)
 	}
+	ctx, cancel := context.WithCancel(o.ctx)
 
-	return &Application{opts: o}
+	return &App{
+		opts:   o,
+		cancel: cancel,
+		ctx:    ctx,
+	}
 }
