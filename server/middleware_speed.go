@@ -1,13 +1,12 @@
-package middleware
+package server
 
 import (
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/zhangliang-zl/reskit/server"
 	"time"
 )
 
-func Speed(logger *log.Helper, slowThreshold int) server.HandlerFunc {
-	return func(c *server.Context) {
+func Speed(logger *log.Helper, slowThreshold int) HandlerFunc {
+	return func(c *Context) {
 		// register txID
 		start := time.Now()
 		defer func() {

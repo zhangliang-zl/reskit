@@ -11,11 +11,11 @@ import (
 	"syscall"
 )
 
-type App struct {
+type Application struct {
 	opts *Options
 }
 
-func (a *App) Run() error {
+func (a *Application) Run() error {
 	ctx := context.Background()
 	eg, ctx := errgroup.WithContext(ctx)
 	wg := sync.WaitGroup{}
@@ -56,20 +56,21 @@ func (a *App) Run() error {
 	return nil
 }
 
-func (a *App) Stop() error {
+func (a *Application) Stop() error {
 	return nil
 }
 
-func New(opts ...Option) *App {
+func New(opts ...Option) *Application {
 	o := &Options{
-		env:    "dev",
-		sigs:   []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
-		logger: log.NewHelper(log.With(log.DefaultLogger, "tag", "app")),
+		env:     "dev",
+		sigs:    []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
+		logger:  log.NewHelper(log.With(log.DefaultLogger, "tag", "app")),
+		servers: make([]Server, 0),
 	}
 
 	for _, opt := range opts {
 		opt(o)
 	}
 
-	return &App{opts: o}
+	return &Application{opts: o}
 }

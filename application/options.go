@@ -11,8 +11,7 @@ type Options struct {
 	env  string
 	name string
 
-	servers map[string]Server
-	objects map[string]Object
+	servers []Server
 
 	// hook functions
 	beforeStart []func() error
@@ -29,3 +28,16 @@ func Name(name string) Option {
 		o.name = name
 	}
 }
+
+func Env(env string) Option {
+	return func(o *Options) {
+		o.env = env
+	}
+}
+
+func Servers(servers ...Server) Option {
+	return func(o *Options) {
+		o.servers = servers
+	}
+}
+

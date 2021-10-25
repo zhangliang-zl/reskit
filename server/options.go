@@ -2,7 +2,6 @@ package server
 
 import (
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/zhangliang-zl/reskit/server/middleware"
 	"time"
 )
 
@@ -15,15 +14,15 @@ type Options struct {
 }
 
 var (
-	DefaultAddress         = "8080"
+	DefaultAddress         = ":8080"
 	DefaultReadTimeout     = time.Second * 60
 	DefaultWriteTimeout    = time.Second * 60
 	DefaultSlowThresholdMS = 200
 	DefaultLogger          = log.NewHelper(log.With(log.DefaultLogger, "tag", "server"))
 	DefaultMiddlewares     = []HandlerFunc{
-		middleware.Recovery(DefaultLogger),
-		middleware.Speed(DefaultLogger, DefaultSlowThresholdMS),
-		middleware.Logging(DefaultLogger),
+		Recovery(DefaultLogger),
+		Speed(DefaultLogger, DefaultSlowThresholdMS),
+		Logging(DefaultLogger),
 	}
 )
 

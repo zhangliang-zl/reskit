@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/zhangliang-zl/reskit/application"
 	"github.com/zhangliang-zl/reskit/server/httperror"
 	"net/http"
 	"sync"
@@ -40,7 +41,7 @@ func (s *Server) WrapPProf() {
 	WrapPProf(s.Engine)
 }
 
-func (s *Server) Close() error {
+func (s *Server) Stop(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	err := s.httpServer.Shutdown(context.Background())
@@ -51,7 +52,7 @@ func (s *Server) Close() error {
 	return err
 }
 
-func (s *Server) Run() error {
+func (s *Server) Start(ctx context.Context) error {
 	s.mu.Lock()
 	s.httpServer = &http.Server{
 		Addr:         s.opts.address,
@@ -98,6 +99,10 @@ func New(opts ...Option) *Server {
 	return s
 }
 
+func (s *Server) Get() interface{} {
+	return s
+}
+
 func noRoute(c *gin.Context) {
 	sendError(c, httperror.NewNotFound())
 }
@@ -105,3 +110,6 @@ func noRoute(c *gin.Context) {
 func noMethod(c *gin.Context) {
 	sendError(c, httperror.NewMethodNotAllowed())
 }
+
+// 屏蔽编辑器报错信息
+var _ application.Server = (*Server)(nil)
