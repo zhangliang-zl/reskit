@@ -59,7 +59,7 @@ func (a *App) Run() error {
 			case <-ctx.Done():
 				return ctx.Err()
 			case <-c:
-				err := a.Stop()
+				err := a.stop()
 				if err != nil {
 					a.opts.logger.Errorf("failed to stop app: %v", err)
 					return err
@@ -83,7 +83,15 @@ func (a *App) Run() error {
 	return nil
 }
 
-func (a *App) Stop() error {
+func (a *App) Name() string {
+	return a.opts.name
+}
+
+func (a *App) Env() string {
+	return a.opts.env
+}
+
+func (a *App) stop() error {
 	a.cancel()
 
 	for _, fn := range a.opts.beforeStop {
