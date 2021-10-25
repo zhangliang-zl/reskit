@@ -17,6 +17,11 @@ type App struct {
 	cancel context.CancelFunc
 }
 
+type Server interface {
+	Start(ctx context.Context) error
+	Stop(ctx context.Context) error
+}
+
 func (a *App) Run() error {
 	if len(a.opts.beforeStart) > 0 {
 		for _, fn := range a.opts.beforeStart {
