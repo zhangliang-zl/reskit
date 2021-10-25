@@ -1,8 +1,8 @@
-package web
+package server
 
 import (
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/zhangliang-zl/reskit/web/middleware"
+	"github.com/zhangliang-zl/reskit/server/middleware"
 	"time"
 )
 
@@ -19,7 +19,7 @@ var (
 	DefaultReadTimeout     = time.Second * 60
 	DefaultWriteTimeout    = time.Second * 60
 	DefaultSlowThresholdMS = 200
-	DefaultLogger          = log.NewHelper(log.With(log.DefaultLogger, "tag", "web"))
+	DefaultLogger          = log.NewHelper(log.With(log.DefaultLogger, "tag", "server"))
 	DefaultMiddlewares     = []HandlerFunc{
 		middleware.Recovery(DefaultLogger),
 		middleware.Speed(DefaultLogger, DefaultSlowThresholdMS),

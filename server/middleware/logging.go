@@ -3,13 +3,13 @@ package middleware
 import (
 	"bytes"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/zhangliang-zl/reskit/web"
+	"github.com/zhangliang-zl/reskit/server"
 	"io/ioutil"
 	"strings"
 )
 
-func Logging(logger *log.Helper) web.HandlerFunc {
-	return func(c *web.Context) {
+func Logging(logger *log.Helper) server.HandlerFunc {
+	return func(c *server.Context) {
 		params := ""
 		if c.ContentType() == "app/json" {
 			body, _ := ioutil.ReadAll(c.Request.Body)

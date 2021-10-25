@@ -1,4 +1,4 @@
-package reskit
+package application
 
 import (
 	"github.com/go-kratos/kratos/v2/log"

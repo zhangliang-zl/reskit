@@ -1,12 +1,14 @@
-package web
+package server
 
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/zhangliang-zl/reskit/web/httperror"
+	"github.com/zhangliang-zl/reskit/server/httperror"
 	"net/http"
 	"sync"
 )
+
+type HandlerFunc func(*Context)
 
 // Server Expand gin Server functions
 type Server struct {

@@ -11,6 +11,6 @@ func TestLogger(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	helper:=log.NewHelper(logger)
+	helper := log.NewHelper(logger)
 	helper.Info("i am syslog logger testing ")
 }

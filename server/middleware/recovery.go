@@ -2,13 +2,13 @@ package middleware
 
 import (
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/zhangliang-zl/reskit/web"
-	"github.com/zhangliang-zl/reskit/web/httperror"
+	"github.com/zhangliang-zl/reskit/server"
+	"github.com/zhangliang-zl/reskit/server/httperror"
 	"runtime"
 )
 
-func Recovery(logger *log.Helper) web.HandlerFunc {
-	return func(c *web.Context) {
+func Recovery(logger *log.Helper) server.HandlerFunc {
+	return func(c *server.Context) {
 		defer func() {
 			// happen panic
 			if r := recover(); r != nil {
