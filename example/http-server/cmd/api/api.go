@@ -23,24 +23,24 @@ func main() {
 	app := reskit.New(
 		reskit.BeforeStart(
 			func() error {
-				fmt.Println("service register")
+				fmt.Println("before start ")
 				return nil
 			}),
 		reskit.AfterStart(
 			func() error {
-				fmt.Println("start after")
+				fmt.Println("after start")
 				return nil
 			}),
 
 		reskit.BeforeStop(
 			func() error {
-				fmt.Println("stop before")
+				fmt.Println("before stop")
 				return nil
 			}),
 
 		reskit.AfterStop(
 			func() error {
-				fmt.Println("stop after")
+				fmt.Println("after stop")
 				return nil
 			}),
 
