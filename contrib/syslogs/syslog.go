@@ -1,4 +1,4 @@
-package syslog
+package syslogs
 
 import (
 	"bytes"

@@ -1,53 +1,47 @@
 package main
 
 import (
-	"fmt"
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/zhangliang-zl/reskit"
+	"github.com/zhangliang-zl/reskit/db"
+	"github.com/zhangliang-zl/reskit/example/http-server/pkg/persist"
+	"github.com/zhangliang-zl/reskit/example/http-server/pkg/route"
+	"github.com/zhangliang-zl/reskit/redis"
 	"github.com/zhangliang-zl/reskit/web"
-	"time"
 )
 
 func main() {
+	err := initPersist()
+	if err != nil {
+		persist.LogHelper.Fatal(err)
+	}
 
-	logHelper := log.NewHelper(log.With(log.DefaultLogger, "project", "test-1"))
-
-	srv := web.New(web.Address(":8081"))
-	srv.AddRoute("GET", "/get", func(c *web.Context) {
-		time.Sleep(3 * time.Second)
-		c.JSON(200, map[string]string{
-			"hello": "world",
-		})
-	})
+	srv := web.New()
+	route.Init(srv)
 
 	app := reskit.New(
-		reskit.BeforeStart(
-			func() error {
-				fmt.Println("before start ")
-				return nil
-			}),
-		reskit.AfterStart(
-			func() error {
-				fmt.Println("after start")
-				return nil
-			}),
-
-		reskit.BeforeStop(
-			func() error {
-				fmt.Println("before stop")
-				return nil
-			}),
-
-		reskit.AfterStop(
-			func() error {
-				fmt.Println("after stop")
-				return nil
-			}),
-
 		reskit.Servers(srv),
 	)
 
 	if err := app.Run(); err != nil {
-		logHelper.Fatal(err)
+		persist.LogHelper.Fatal(err)
 	}
+}
+
+func initPersist() error {
+	// init redis
+	rds, err := redis.New()
+	if err != nil {
+		persist.LogHelper.Fatal(err)
+	}
+	persist.KVStore = rds
+
+	// init db
+	t1DB, err := db.New("t1:111@tcp(127.0.0.1:3306)/t1?charset=utf8&parseTime=true&loc=Local")
+	if err != nil {
+		return err
+	}
+
+	persist.DB = t1DB
+
+	return nil
 }

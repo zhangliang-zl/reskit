@@ -15,8 +15,8 @@ type Options struct {
 
 var (
 	DefaultAddress         = ":8080"
-	DefaultReadTimeout     = time.Second * 60
-	DefaultWriteTimeout    = time.Second * 60
+	DefaultReadTimeout     = time.Second * 300
+	DefaultWriteTimeout    = time.Second * 300
 	DefaultSlowThresholdMS = 200
 	DefaultLogger          = log.NewHelper(log.With(log.DefaultLogger, "tag", "web"))
 	DefaultMiddlewares     = []HandlerFunc{
@@ -34,7 +34,7 @@ func Address(address string) Option {
 	}
 }
 
-func Middlewares(middlewares ...HandlerFunc) Option {
+func Middleware(middlewares ...HandlerFunc) Option {
 	return func(o *Options) {
 		o.middlewares = middlewares
 	}

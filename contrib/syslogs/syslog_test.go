@@ -1,4 +1,4 @@
-package syslog
+package syslogs
 
 import (
 	"github.com/go-kratos/kratos/v2/log"
@@ -12,5 +12,5 @@ func TestLogger(t *testing.T) {
 		panic(err)
 	}
 	helper := log.NewHelper(logger)
-	helper.Info("i am syslog logger testing ")
+	helper.Info("i am syslogs logger testing ")
 }

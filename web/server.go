@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/zhangliang-zl/reskit"
 	"github.com/zhangliang-zl/reskit/web/httperror"
+	"net"
 	"net/http"
 	"sync"
 )
@@ -19,7 +20,7 @@ type Server struct {
 	mu         sync.Mutex
 }
 
-func (s *Server) AddRoute(method, relativePath string, handlers ...HandlerFunc) {
+func (s *Server) Route(method, relativePath string, handlers ...HandlerFunc) {
 	ginHandlers := make([]gin.HandlerFunc, 0)
 	for _, h := range handlers {
 		ginHandlers = append(ginHandlers, s.makeGinHandlerFunc(h))
@@ -33,7 +34,7 @@ func (s *Server) makeGinHandlerFunc(h func(*Context)) gin.HandlerFunc {
 	}
 }
 
-func (s *Server) UseMiddleware(h HandlerFunc) {
+func (s *Server) Middleware(h HandlerFunc) {
 	s.Use(s.makeGinHandlerFunc(h))
 }
 
@@ -41,10 +42,10 @@ func (s *Server) WrapPProf() {
 	WrapPProf(s.Engine)
 }
 
-func (s *Server) Stop(_ context.Context) error {
+func (s *Server) Stop(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	err := s.httpServer.Shutdown(context.Background())
+	err := s.httpServer.Shutdown(ctx)
 	if err != nil {
 		s.opts.logger.Errorf("web shutdown error :%s", err.Error())
 	}
@@ -52,21 +53,25 @@ func (s *Server) Stop(_ context.Context) error {
 	return err
 }
 
-func (s *Server) Start(_ context.Context) error {
+func (s *Server) Start(ctx context.Context) error {
 	s.mu.Lock()
 	s.httpServer = &http.Server{
 		Addr:         s.opts.address,
 		Handler:      s.Engine,
 		ReadTimeout:  s.opts.readTimeout,
 		WriteTimeout: s.opts.writeTimeout,
+		BaseContext: func(net.Listener) context.Context {
+			return ctx
+		},
 	}
 	s.mu.Unlock()
-	s.opts.logger.Info("web start running")
+	s.opts.logger.Info("server start...")
 	err := s.httpServer.ListenAndServe()
-	if err != nil {
-		s.opts.logger.Errorf("run error :%s", err.Error())
+	if err != nil && err.Error() != "http: Server closed" {
+		return err
 	}
-	return err
+
+	return nil
 }
 
 func New(opts ...Option) *Server {
@@ -90,7 +95,7 @@ func New(opts ...Option) *Server {
 	}
 
 	for _, middlewareFunc := range o.middlewares {
-		s.UseMiddleware(middlewareFunc)
+		s.Middleware(middlewareFunc)
 	}
 
 	s.NoMethod(noMethod)

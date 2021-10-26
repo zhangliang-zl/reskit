@@ -41,7 +41,7 @@ func sendError(c *gin.Context, err httperror.Error) {
 		code = http.StatusInternalServerError
 	}
 
-	c.Error(err)
+	_ = c.Error(err)
 	c.Abort()
 	c.JSON(err.GetCode(), map[string]interface{}{
 		"error": map[string]interface{}{

@@ -12,6 +12,7 @@ require (
 	github.com/go-playground/validator/v10 v10.5.0
 	github.com/go-redis/redis/v8 v8.8.0
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/robfig/cron/v3 v3.0.0
 	github.com/vmihailenco/msgpack/v5 v5.1.0
 	go.opentelemetry.io/otel/internal/metric v0.24.0 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c

@@ -56,24 +56,28 @@ func (a *App) Run() error {
 		}
 	}
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, a.opts.sigs...)
+	stopChan := make(chan os.Signal, 1)
+	signal.Notify(stopChan, a.opts.sigs...)
 	eg.Go(func() error {
 		for {
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
-			case <-c:
-				err := a.stop()
-				if err != nil {
-					a.opts.logger.Errorf("failed to stop app: %v", err)
-					return err
+			case <-stopChan:
+				var err error
+				for _, fn := range a.opts.beforeStop {
+					if err = fn(); err != nil {
+						a.opts.logger.Errorf("beforeStop err:%s", err.Error())
+					}
 				}
+				a.cancel()
+
+				return err
 			}
 		}
 	})
 
-	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
+	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) && err.Error() != "http: Server closed" {
 		return err
 	}
 
@@ -96,18 +100,6 @@ func (a *App) Env() string {
 	return a.opts.env
 }
 
-func (a *App) stop() error {
-	a.cancel()
-
-	for _, fn := range a.opts.beforeStop {
-		if err := fn(); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func New(opts ...Option) *App {
 	o := &Options{
 		env:     "dev",
@@ -116,9 +108,11 @@ func New(opts ...Option) *App {
 		servers: make([]Server, 0),
 		ctx:     context.Background(),
 	}
+
 	for _, opt := range opts {
 		opt(o)
 	}
+
 	ctx, cancel := context.WithCancel(o.ctx)
 
 	return &App{

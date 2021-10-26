@@ -11,7 +11,6 @@ var (
 	DefaultSlowThreshold   = 100 * time.Millisecond
 	DefaultConnMaxLifetime = 300 * time.Second
 	DefaultConnMaxIdleTime = 300 * time.Second
-	DefaultDisableAutoPing = true
 	DefaultLogger          = log.NewHelper(log.With(log.DefaultLogger, "tag", "db"))
 )
 

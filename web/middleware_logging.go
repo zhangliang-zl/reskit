@@ -15,7 +15,7 @@ func Logging(logger *log.Helper) HandlerFunc {
 			c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 			params += string(body)
 		} else {
-			c.Request.ParseForm()
+			_ = c.Request.ParseForm()
 			params += c.Request.PostForm.Encode()
 		}
 

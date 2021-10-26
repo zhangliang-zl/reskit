@@ -26,7 +26,7 @@ func New(dsn string, opts ...Option) (*gorm.DB, error) {
 		connMaxIdleTime: DefaultConnMaxIdleTime,
 		connMaxLifetime: DefaultConnMaxLifetime,
 		slowThreshold:   DefaultSlowThreshold,
-		disableAutoPing: DefaultDisableAutoPing,
+		disableAutoPing: true,
 		Logger:          DefaultLogger,
 	}
 
