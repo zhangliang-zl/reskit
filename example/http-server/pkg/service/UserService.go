@@ -19,7 +19,7 @@ func (*UserService) Info(id string) (model.UserModel, error) {
 		return user, nil
 	}
 
-	return user, errors.New("not found this record")
+	return user, errors.New("not found this recorder")
 }
 
 func NewUserService() *UserService {

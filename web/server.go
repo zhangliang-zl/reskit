@@ -65,7 +65,7 @@ func (s *Server) Start(ctx context.Context) error {
 		},
 	}
 	s.mu.Unlock()
-	s.opts.logger.Info("server start...")
+	s.opts.logger.Info("web start...")
 	err := s.httpServer.ListenAndServe()
 	if err != nil && err.Error() != "http: Server closed" {
 		return err
