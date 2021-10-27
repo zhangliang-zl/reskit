@@ -2,7 +2,7 @@ package reskit
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/zhangliang-zl/reskit/logs"
 	"os"
 )
 
@@ -22,7 +22,7 @@ type Options struct {
 	afterStop   []func() error
 
 	sigs   []os.Signal
-	logger *log.Helper
+	logger logs.Logger
 }
 
 func Name(name string) Option {
@@ -49,7 +49,7 @@ func Signal(sigs ...os.Signal) Option {
 	}
 }
 
-func Logger(logger *log.Helper) Option {
+func Logger(logger logs.Logger) Option {
 	return func(o *Options) {
 		o.logger = logger
 	}

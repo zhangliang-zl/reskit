@@ -1,13 +1,13 @@
 package service
 
 import (
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/zhangliang-zl/reskit/logs"
 	"testing"
 	"time"
 )
 
 func startServer(opts ServerOptions) error {
-	logger := log.NewHelper(log.With(log.DefaultLogger, "tag", "uuid"))
+	logger := logs.DefaultLogger("uuid")
 	ser, err := NewServer(opts, logger)
 	if err != nil {
 		return err

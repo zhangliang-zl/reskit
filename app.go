@@ -2,8 +2,8 @@ package reskit
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/log"
+	"errors"
+	"github.com/zhangliang-zl/reskit/logs"
 	"golang.org/x/sync/errgroup"
 	"os"
 	"os/signal"
@@ -67,7 +67,7 @@ func (a *App) Run() error {
 				var err error
 				for _, fn := range a.opts.beforeStop {
 					if err = fn(); err != nil {
-						a.opts.logger.Errorf("beforeStop err:%s", err.Error())
+						a.opts.logger.Error(a.ctx, "beforeStop err:%s", err.Error())
 					}
 				}
 				a.cancel()
@@ -104,7 +104,7 @@ func New(opts ...Option) *App {
 	o := &Options{
 		env:     "dev",
 		sigs:    []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
-		logger:  log.NewHelper(log.With(log.DefaultLogger, "tag", "app")),
+		logger:  logs.DefaultLogger("app"),
 		servers: make([]Server, 0),
 		ctx:     context.Background(),
 	}

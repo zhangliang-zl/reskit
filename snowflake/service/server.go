@@ -1,8 +1,9 @@
 package service
 
 import (
+	"context"
 	"fmt"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/zhangliang-zl/reskit/logs"
 	"github.com/zhangliang-zl/reskit/snowflake"
 	"net"
 	"strconv"
@@ -11,7 +12,7 @@ import (
 
 type Server struct {
 	port     int
-	logger   *log.Helper
+	logger   logs.Logger
 	idWorker *snowflake.Worker
 }
 
@@ -23,7 +24,7 @@ type ServerOptions struct {
 	Epoch      int64 // 推荐系统开始使用时开始
 }
 
-func NewServer(opts ServerOptions, logger *log.Helper) (*Server, error) {
+func NewServer(opts ServerOptions, logger logs.Logger) (*Server, error) {
 	workerID := opts.WorkerID
 	idWorker, err := snowflake.NewWorker(workerID, opts.WorkerBits, opts.NumberBits, opts.Epoch)
 	if err != nil {
@@ -38,6 +39,7 @@ func NewServer(opts ServerOptions, logger *log.Helper) (*Server, error) {
 }
 
 func (s *Server) Run() error {
+	ctx := context.Background()
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", fmt.Sprintf(":%d", s.port))
 	if err != nil {
 		return err
@@ -52,7 +54,7 @@ func (s *Server) Run() error {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			s.logger.Errorf("Accept Error:%s", err.Error())
+			s.logger.Error(ctx, "Accept Error:%s", err.Error())
 			continue
 		}
 		go s.handle(conn)
@@ -69,6 +71,7 @@ func (s *Server) handle(conn net.Conn) error {
 	request := make([]byte, 128)
 loop:
 	for {
+		ctx := context.Background()
 		readLen, err := conn.Read(request)
 		if err != nil {
 			continue
@@ -76,7 +79,7 @@ loop:
 
 		instruction := string(request[:readLen])
 		if readLen == 0 {
-			s.logger.Errorf("ReadLen is 0 , client disconnect automatically")
+			s.logger.Error(ctx, "ReadLen is 0 , client disconnect automatically")
 			break
 		}
 
@@ -85,15 +88,15 @@ loop:
 			uuid := s.idWorker.NextID()
 			uuidStr := strconv.FormatInt(uuid, 10)
 			respInfo := fmt.Sprintf("VALUE uuid 0 %d\r\n%s\r\nEND\r\n", len(uuidStr), uuidStr)
-			conn.Write([]byte(respInfo))
-			s.logger.Debugf("nextID is %d", uuid)
+			_, _ = conn.Write([]byte(respInfo))
+			s.logger.Debug(ctx, "nextID is %d", uuid)
 
 		case "quit\r\n":
-			s.logger.Debugf("client is quit")
+			s.logger.Debug(ctx, "client is quit")
 			break loop
 
 		default:
-			s.logger.Warnf("unknown instructions")
+			s.logger.Warn(ctx, "unknown instructions")
 		}
 		request = make([]byte, 128)
 	}

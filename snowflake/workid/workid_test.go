@@ -5,7 +5,7 @@ import (
 )
 
 func TestFactory_Get(t *testing.T) {
-	fac := NewFactory("user:123456ABC@tcp(localhost:3306)/db1?charset=utf8&parseTime=true&loc=Local")
+	fac := NewFactory("t1:111@tcp(localhost:3306)/t1?charset=utf8&parseTime=true&loc=Local")
 	var firstGetID int64
 	for i := 0; i < 10; i++ {
 		id, err := fac.Get()
