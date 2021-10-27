@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/zhangliang-zl/reskit"
 	"github.com/zhangliang-zl/reskit/db"
-	"github.com/zhangliang-zl/reskit/example/http-server/pkg/persist"
-	"github.com/zhangliang-zl/reskit/example/http-server/pkg/route"
+	"github.com/zhangliang-zl/reskit/example/pkg/persist"
+	"github.com/zhangliang-zl/reskit/example/pkg/route"
 	"github.com/zhangliang-zl/reskit/logs"
 	"github.com/zhangliang-zl/reskit/redis"
 	"github.com/zhangliang-zl/reskit/server"
@@ -19,7 +19,6 @@ func main() {
 	}
 
 	srv := server.New()
-	srv.Middleware(server.SimpleTracing())
 	route.Init(srv)
 
 	app := reskit.New(

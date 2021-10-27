@@ -7,10 +7,10 @@ import (
 	"strings"
 )
 
-func Logging(logger logs.Logger) HandlerFunc {
+func RequestParams(logger logs.Logger) HandlerFunc {
 	return func(ctx *Context) {
 		params := ""
-		if ctx.ContentType() == "app/json" {
+		if ctx.ContentType() == "application/json" {
 			body, _ := ioutil.ReadAll(ctx.Request.Body)
 			ctx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 			params += string(body)
@@ -19,11 +19,13 @@ func Logging(logger logs.Logger) HandlerFunc {
 			params += ctx.Request.PostForm.Encode()
 		}
 
-		msg := strings.ReplaceAll(params, "\n", "")
-		if msg != "" {
-			logger.Info(ctx, "[params] uri:"+ctx.Request.RequestURI+",body:"+msg)
+		body := strings.ReplaceAll(params, "\n", "")
+		msg := "[request] uri:" + ctx.Request.RequestURI
+		if body != "" {
+			msg += ",body:" + body
 		}
 
+		logger.Info(ctx, msg)
 		ctx.Next()
 	}
 }

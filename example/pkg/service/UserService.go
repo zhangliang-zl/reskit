@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
-	"github.com/zhangliang-zl/reskit/example/http-server/pkg/model"
+	"github.com/zhangliang-zl/reskit/example/pkg/model"
 )
 
 type UserService struct {

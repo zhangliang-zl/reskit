@@ -1,8 +1,7 @@
 package controlelr
 
 import (
-	"github.com/zhangliang-zl/reskit/example/http-server/pkg/persist"
-	"github.com/zhangliang-zl/reskit/example/http-server/pkg/service"
+	"github.com/zhangliang-zl/reskit/example/pkg/service"
 	"github.com/zhangliang-zl/reskit/server"
 )
 
@@ -17,6 +16,5 @@ func (*UserController) Info(ctx *server.Context) {
 		ctx.BadRequest(err)
 		return
 	}
-	persist.LogHelper.Infof("get user info, params id=%s", id)
 	ctx.Success(info)
 }

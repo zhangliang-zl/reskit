@@ -8,5 +8,5 @@ import (
 
 func TestLogger(t *testing.T) {
 	logger := NewLogger(stdout.NewRecorder(), LevelInfo, "tag-1")
-	logger.Info(context.Background(), "i am syslogs logger testing ")
+	logger.Info(context.Background(), "i am syslog logger testing")
 }

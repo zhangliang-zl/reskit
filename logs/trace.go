@@ -7,10 +7,10 @@ import (
 	"time"
 )
 
-const traceIDKey = "trace_id"
+const TraceIDKey = "trace_id"
 
 func findTraceID(ctx context.Context) string {
-	traceID := ctx.Value(traceIDKey)
+	traceID := ctx.Value(TraceIDKey)
 	if traceID == nil {
 		return ""
 	}

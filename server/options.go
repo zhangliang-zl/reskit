@@ -22,7 +22,7 @@ var (
 	DefaultMiddlewares     = []HandlerFunc{
 		Recovery(DefaultLogger),
 		Speed(DefaultLogger, DefaultSlowThresholdMS),
-		Logging(DefaultLogger),
+		RequestParams(DefaultLogger),
 	}
 )
 
