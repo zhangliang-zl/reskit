@@ -1,28 +1,28 @@
 package db
 
 import (
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/zhangliang-zl/reskit/logs"
 	"time"
 )
 
 var (
-	DefaultMaxOpenConns    = 100
-	DefaultMaxIdleConns    = 100
-	DefaultSlowThreshold   = 100 * time.Millisecond
-	DefaultConnMaxLifetime = 300 * time.Second
-	DefaultConnMaxIdleTime = 300 * time.Second
-	DefaultLogger          = log.NewHelper(log.With(log.DefaultLogger, "tag", "db"))
+	DefaultMaxOpenConnections = 100
+	DefaultMaxIdleConnections = 100
+	DefaultSlowThreshold      = 100 * time.Millisecond
+	DefaultConnMaxLifetime    = 300 * time.Second
+	DefaultConnMaxIdleTime    = 300 * time.Second
+	DefaultLogger             = logs.DefaultLogger("db")
 )
 
 type Option func(options *Options)
 
-func MaxOPenConns(num int) Option {
+func MaxOpenConnections(num int) Option {
 	return func(c *Options) {
 		c.maxOpenConns = num
 	}
 }
 
-func MaxIdleConns(num int) Option {
+func MaxIdleConnections(num int) Option {
 	return func(c *Options) {
 		c.maxIdleConns = num
 	}
@@ -52,7 +52,7 @@ func DisableAutoPing(close bool) Option {
 	}
 }
 
-func Logger(logger *log.Helper) Option {
+func Logger(logger logs.Logger) Option {
 	return func(c *Options) {
 		c.Logger = logger
 	}

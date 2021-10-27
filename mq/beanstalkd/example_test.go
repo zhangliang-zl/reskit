@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/zhangliang-zl/reskit/logs"
 	"math/rand"
 	"sync"
 	"testing"
@@ -14,7 +14,7 @@ import (
 
 var q, _ = NewQueue("localhost:11300")
 
-var logger = log.NewHelper(log.With(log.DefaultLogger, "tag", "beanstalk"))
+var logger = logs.DefaultLogger("beanstalk")
 var runTimes = 0
 
 func TestQueueBasic(t *testing.T) {

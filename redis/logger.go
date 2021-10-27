@@ -2,13 +2,13 @@ package redis
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/zhangliang-zl/reskit/logs"
 )
 
 type logWriter struct {
-	l *log.Helper
+	l logs.Logger
 }
 
-func (r *logWriter) Printf(_ context.Context, msg string, data ...interface{}) {
-	r.l.Infof(msg, data)
+func (r *logWriter) Printf(ctx context.Context, msg string, data ...interface{}) {
+	r.l.Info(ctx, msg, data)
 }

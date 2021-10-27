@@ -1,9 +1,11 @@
 package redis
 
-import "github.com/go-kratos/kratos/v2/log"
+import (
+	"github.com/zhangliang-zl/reskit/logs"
+)
 
 var (
-	DefaultLogger    = log.NewHelper(log.With(log.DefaultLogger, "tag", "cache"))
+	DefaultLogger    = logs.DefaultLogger("cache")
 	DefaultKeyPrefix = "Caching:"
 )
 
@@ -15,7 +17,7 @@ func Prefix(key string) Option {
 	}
 }
 
-func Logger(logger *log.Helper) Option {
+func Logger(logger logs.Logger) Option {
 	return func(c *Cache) {
 		c.logger = logger
 	}

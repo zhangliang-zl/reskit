@@ -1,15 +1,15 @@
 package redislock
 
 import (
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis/v8"
+	"github.com/zhangliang-zl/reskit/logs"
 )
 
-var DefaultLogger = log.NewHelper(log.With(log.DefaultLogger, "tag", "lock"))
+var DefaultLogger = logs.DefaultLogger("lock")
 
 type FactoryOption func(factory *Factory)
 
-func Logger(logger *log.Helper) FactoryOption {
+func Logger(logger logs.Logger) FactoryOption {
 	return func(factory *Factory) {
 		factory.logger = logger
 	}
@@ -29,7 +29,7 @@ func NewFactory(rdsClient *redis.Client, opts ...FactoryOption) *Factory {
 
 type Factory struct {
 	rdsClient *redis.Client
-	logger    *log.Helper
+	logger    logs.Logger
 }
 
 func (f *Factory) New(key string, opts ...Option) *Mutex {

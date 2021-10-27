@@ -4,10 +4,10 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis/v8"
 	"github.com/vmihailenco/msgpack/v5"
 	"github.com/zhangliang-zl/reskit/cache"
+	"github.com/zhangliang-zl/reskit/logs"
 	"github.com/zhangliang-zl/reskit/redislock"
 	"time"
 )
@@ -15,7 +15,7 @@ import (
 type Cache struct {
 	client      *redis.Client
 	keyPrefix   string
-	logger      *log.Helper
+	logger      logs.Logger
 	maxBuild    time.Duration // GetOrSet() The maximum time to build the cache, beyond which other threads can build
 	lockFactory *redislock.Factory
 }
@@ -30,7 +30,7 @@ func (c *Cache) get(ctx context.Context, key string, val interface{}) (exist boo
 
 	// Cache miss
 	if err == redis.Nil {
-		c.logger.Warnf("Cache Miss key %s", key)
+		c.logger.Warn(ctx, "Cache Miss key %s", key)
 		err = nil
 		return
 	}
@@ -55,7 +55,7 @@ func (c *Cache) set(ctx context.Context, key string, val interface{}, ttl time.D
 	b, err := msgpack.Marshal(val)
 	err = c.client.Set(ctx, key, b, ttl).Err()
 	if err != nil {
-		c.logger.Errorf("redis set %s error:%v", key, err)
+		c.logger.Error(ctx, "redis set %s error:%v", key, err)
 	}
 	return err
 }
@@ -64,7 +64,7 @@ func (c *Cache) Delete(ctx context.Context, key string) error {
 	key = c.buildKey(key)
 	err := c.delete(ctx, key)
 	if err != nil {
-		c.logger.Errorf("Delete %s error:%v", key, err)
+		c.logger.Error(ctx, "Delete %s error:%v", key, err)
 	}
 	return err
 }
@@ -72,7 +72,7 @@ func (c *Cache) Delete(ctx context.Context, key string) error {
 func (c *Cache) GetOrSet(ctx context.Context, key string, valPointer interface{}, ttl time.Duration, callback func() (interface{}, error)) (err error) {
 	err = c.getOrSet(ctx, key, valPointer, ttl, callback)
 	if err != nil {
-		c.logger.Errorf("GetOrSet %s error:%v", key, err)
+		c.logger.Error(ctx, "GetOrSet %s error:%v", key, err)
 	}
 	return err
 }
@@ -101,10 +101,10 @@ func (c *Cache) getOrSet(ctx context.Context, key string, val interface{}, ttl t
 	// Key Not exist: callback() and set val
 	locker := c.lockFactory.New(key)
 
-	locker.Lock(ctx)
+	_ = locker.Lock(ctx)
 	defer locker.UnLock(ctx)
 
-	// Confirm again after getting the redislock
+	// Confirm again after getting the redis
 	exist, _ = c.get(ctx, key, val)
 	if exist {
 		return
@@ -123,7 +123,7 @@ func (c *Cache) getOrSet(ctx context.Context, key string, val interface{}, ttl t
 
 	err = c.client.Set(ctx, key, p, ttl).Err()
 	if err != nil {
-		c.logger.Errorf("redis set %s error:%v", key, err)
+		c.logger.Error(ctx, "redis set %s error:%v", key, err)
 	}
 
 	return msgpack.Unmarshal(p, val)
@@ -143,7 +143,6 @@ func (c *Cache) buildKey(key string) string {
 	md5Key := hex.EncodeToString(h.Sum(nil))
 	return c.keyPrefix + md5Key
 }
-
 
 func NewCache(client *redis.Client, lockFactory *redislock.Factory, opts ...Option) cache.Cache {
 	c := &Cache{

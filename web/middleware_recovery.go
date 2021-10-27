@@ -1,29 +1,29 @@
 package web
 
 import (
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/zhangliang-zl/reskit/logs"
 	"github.com/zhangliang-zl/reskit/web/httperror"
 	"runtime"
 )
 
-func Recovery(logger *log.Helper) HandlerFunc {
-	return func(c *Context) {
+func Recovery(logger logs.Logger) HandlerFunc {
+	return func(ctx *Context) {
 		defer func() {
 			// happen panic
 			if r := recover(); r != nil {
 				var buf [4096]byte
 				n := runtime.Stack(buf[:], false)
-				logger.Errorf("[panic] %v, stack: %s", r, string(buf[:n]))
-				c.SendError(httperror.NewInternalError())
+				logger.Error(ctx, "[panic] %v, stack: %s", r, string(buf[:n]))
+				ctx.SendError(httperror.NewInternalError())
 			}
 
 			// error log
-			lastErr := c.Errors.Last()
+			lastErr := ctx.Errors.Last()
 			if lastErr != nil {
-				logger.Errorf("[error]  %v ", lastErr)
+				logger.Error(ctx, "[error]  %v ", lastErr)
 			}
 		}()
 
-		c.Next()
+		ctx.Next()
 	}
 }

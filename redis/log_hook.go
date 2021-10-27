@@ -2,13 +2,13 @@ package redis
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis/v8"
+	"github.com/zhangliang-zl/reskit/logs"
 	"time"
 )
 
 type logHook struct {
-	l *log.Helper
+	l logs.Logger
 }
 
 func (logHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
@@ -19,7 +19,7 @@ func (logHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Cont
 func (h logHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 	start := ctx.Value("redis-once-time").(int64)
 	elapsed := float64(time.Now().UnixNano()/1e3-start) / 1000
-	h.l.Infof("%s cost time: %.3fms ", cmd.String(), elapsed)
+	h.l.Info(ctx, "%s cost time: %.3fms ", cmd.String(), elapsed)
 	return nil
 }
 

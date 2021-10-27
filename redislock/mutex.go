@@ -3,8 +3,8 @@ package redislock
 import (
 	"context"
 	"errors"
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis/v8"
+	"github.com/zhangliang-zl/reskit/logs"
 	"math/rand"
 	"strconv"
 	"time"
@@ -14,7 +14,7 @@ var ErrLockOvertime = errors.New("Locking failed , timeout ")
 
 type Mutex struct {
 	redisClient *redis.Client
-	logger      *log.Helper
+	logger      logs.Logger
 
 	key  string
 	opts *Options
@@ -38,17 +38,17 @@ func (m *Mutex) Lock(ctx context.Context) error {
 	for {
 		cmd := m.redisClient.SetNX(ctx, m.key, m.lockID, m.opts.duration)
 		if cmd.Err() == redis.ErrClosed {
-			m.logger.Errorf("lock fail. %s, redis close", m.key)
+			m.logger.Error(ctx, "lock fail. %s, redis close", m.key)
 			return redis.ErrClosed
 		}
 
 		if cmd.Err() != nil {
-			m.logger.Errorf("lock fail. %s, redis error :%s", m.key, cmd.Err())
+			m.logger.Error(ctx, "lock fail. %s, redis error :%s", m.key, cmd.Err())
 			continue
 		}
 
 		if cmd.Val() {
-			m.logger.Infof("lock success. %s,  %s ,cost: %dms", m.key, m.lockID, time.Now().Sub(start).Milliseconds())
+			m.logger.Info(ctx, "lock success. %s,  %s ,cost: %dms", m.key, m.lockID, time.Now().Sub(start).Milliseconds())
 			m.locked = true
 
 			return nil
@@ -57,11 +57,10 @@ func (m *Mutex) Lock(ctx context.Context) error {
 		time.Sleep(m.opts.retryInterval)
 
 		if time.Now().UnixNano() > m.lockOvertime.UnixNano() {
-			m.logger.Errorf("lock fail. %s err: lock timeout, cost: %dms", m.key, time.Now().Sub(start).Milliseconds())
+			m.logger.Error(ctx, "lock fail. %s err: lock timeout, cost: %dms", m.key, time.Now().Sub(start).Milliseconds())
 			return ErrLockOvertime
 		}
 	}
-
 }
 
 func (m *Mutex) UnLock(ctx context.Context) {
@@ -77,13 +76,13 @@ func (m *Mutex) UnLock(ctx context.Context) {
 	cmd := m.redisClient.Eval(ctx, script, []string{m.key}, m.lockID)
 	err := cmd.Err()
 	if err != nil {
-		m.logger.Errorf("unlock fail. %s, error :%v", m.key, err)
+		m.logger.Error(ctx, "unlock fail. %s, error :%v", m.key, err)
 		return
 	}
 
 	m.locked = false
 
-	m.logger.Infof("unlock %s, result: %v ", m.key, cmd.Val())
+	m.logger.Info(ctx, "unlock %s, result: %v ", m.key, cmd.Val())
 	return
 }
 

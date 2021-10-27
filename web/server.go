@@ -47,7 +47,7 @@ func (s *Server) Stop(ctx context.Context) error {
 	defer s.mu.Unlock()
 	err := s.httpServer.Shutdown(ctx)
 	if err != nil {
-		s.opts.logger.Errorf("web shutdown error :%s", err.Error())
+		s.opts.logger.Error(ctx, "web shutdown error :%s", err.Error())
 	}
 
 	return err
@@ -65,7 +65,7 @@ func (s *Server) Start(ctx context.Context) error {
 		},
 	}
 	s.mu.Unlock()
-	s.opts.logger.Info("web start...")
+	s.opts.logger.Info(ctx, "web start...")
 	err := s.httpServer.ListenAndServe()
 	if err != nil && err.Error() != "http: Server closed" {
 		return err

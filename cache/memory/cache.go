@@ -28,7 +28,7 @@ func (c *Cache) getLocker(key string) *sync.Mutex {
 	return l
 }
 
-func (c *Cache) Get(ctx context.Context, key string, val interface{}) (bool, error) {
+func (c *Cache) Get(_ context.Context, key string, val interface{}) (bool, error) {
 	b, err := c.freeCache.Get([]byte(key))
 	if err != nil && err != freecache.ErrNotFound {
 		return false, err
@@ -46,7 +46,7 @@ func (c *Cache) Get(ctx context.Context, key string, val interface{}) (bool, err
 	return true, nil
 }
 
-func (c *Cache) Set(ctx context.Context, key string, val interface{}, ttl time.Duration) error {
+func (c *Cache) Set(_ context.Context, key string, val interface{}, ttl time.Duration) error {
 	data, err := msgpack.Marshal(val)
 	if err != nil {
 		return err
@@ -55,7 +55,7 @@ func (c *Cache) Set(ctx context.Context, key string, val interface{}, ttl time.D
 	return c.freeCache.Set([]byte(key), data, int(ttl.Seconds()))
 }
 
-func (c *Cache) Delete(ctx context.Context, key string) error {
+func (c *Cache) Delete(_ context.Context, key string) error {
 	affected := c.freeCache.Del([]byte(key))
 	if affected {
 		return nil
@@ -64,7 +64,7 @@ func (c *Cache) Delete(ctx context.Context, key string) error {
 	return errors.New(fmt.Sprintf("Delete fail, No key %s", key))
 }
 
-func (c *Cache) GetOrSet(ctx context.Context, key string, val interface{}, ttl time.Duration, callback func() (interface{}, error)) (err error) {
+func (c *Cache) GetOrSet(_ context.Context, key string, val interface{}, ttl time.Duration, callback func() (interface{}, error)) (err error) {
 
 	// When ttl<=0: callback() and return
 	if ttl <= 0 {
@@ -94,7 +94,6 @@ func (c *Cache) GetOrSet(ctx context.Context, key string, val interface{}, ttl t
 	lock.Lock()
 	defer lock.Unlock()
 
-	// Confirm again after getting the redislock
 	data, err = c.freeCache.Get(keyByte)
 	if len(data) > 0 {
 		return msgpack.Unmarshal(data, val)

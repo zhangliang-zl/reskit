@@ -2,8 +2,8 @@ package redis
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis/v8"
+	"github.com/zhangliang-zl/reskit/logs"
 	"time"
 )
 
@@ -11,7 +11,7 @@ type Options struct {
 	addr     string
 	password string
 	dbNum    int
-	logger   *log.Helper
+	logger   logs.Logger
 }
 
 func New(opts ...Option) (*redis.Client, error) {

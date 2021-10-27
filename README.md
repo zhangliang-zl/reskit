@@ -1,5 +1,7 @@
 ###
 TODOLIST
 
-- 重新设计log包 支持context, 支持With方法， with("trace_id",xxx) , with("span_id") 携带到context上
+- snowflake 增加默认值
+- web trace , cros 实现
+- logs增强 ，考虑通过 context获取kv 值，输出到日志
 - rabbitmq 实现

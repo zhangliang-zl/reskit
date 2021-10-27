@@ -1,28 +1,28 @@
 package web
 
 import (
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/zhangliang-zl/reskit/logs"
 	"time"
 )
 
-func Speed(logger *log.Helper, slowThreshold int) HandlerFunc {
-	return func(c *Context) {
+func Speed(logger logs.Logger, slowThreshold int) HandlerFunc {
+	return func(ctx *Context) {
 		// register txID
 		start := time.Now()
 		defer func() {
 			// slow query default 200 ms
 			layout := "[speed] [%s] [%d] %s, cost : %.3fms"
 			elapsed := float64(time.Since(start).Microseconds()) / 1e3
-			status := c.Writer.Status()
-			params := []interface{}{c.Request.Method, status, c.Request.URL.Path, elapsed}
+			status := ctx.Writer.Status()
+			params := []interface{}{ctx.Request.Method, status, ctx.Request.URL.Path, elapsed}
 
 			if elapsed >= float64(slowThreshold) {
-				logger.Warnf(layout+" [SLOW]", params...)
+				logger.Warn(ctx, layout+" [SLOW]", params...)
 			} else {
-				logger.Infof(layout, params...)
+				logger.Info(ctx, layout, params...)
 			}
 		}()
 
-		c.Next()
+		ctx.Next()
 	}
 }

@@ -2,28 +2,28 @@ package web
 
 import (
 	"bytes"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/zhangliang-zl/reskit/logs"
 	"io/ioutil"
 	"strings"
 )
 
-func Logging(logger *log.Helper) HandlerFunc {
-	return func(c *Context) {
+func Logging(logger logs.Logger) HandlerFunc {
+	return func(ctx *Context) {
 		params := ""
-		if c.ContentType() == "app/json" {
-			body, _ := ioutil.ReadAll(c.Request.Body)
-			c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+		if ctx.ContentType() == "app/json" {
+			body, _ := ioutil.ReadAll(ctx.Request.Body)
+			ctx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 			params += string(body)
 		} else {
-			_ = c.Request.ParseForm()
-			params += c.Request.PostForm.Encode()
+			_ = ctx.Request.ParseForm()
+			params += ctx.Request.PostForm.Encode()
 		}
 
 		msg := strings.ReplaceAll(params, "\n", "")
 		if msg != "" {
-			logger.Infof("[params] " + c.Request.RequestURI + " " + msg)
+			logger.Info(ctx, "[params] uri:"+ctx.Request.RequestURI+",body:"+msg)
 		}
 
-		c.Next()
+		ctx.Next()
 	}
 }

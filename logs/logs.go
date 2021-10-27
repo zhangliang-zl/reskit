@@ -23,6 +23,13 @@ type LoggerFactory interface {
 	Get(tag string) (Logger, error)
 }
 
+var DefaultRecorder = stdout.NewRecorder()
+var DefaultLevel = LevelInfo
+
+func DefaultLogger(tag string) Logger {
+	return NewLogger(DefaultRecorder, DefaultLevel, tag)
+}
+
 var _ Recorder = (*stdout.Recorder)(nil)
 var _ Recorder = (*syslog.Recorder)(nil)
 var _ Recorder = (*empty.Recorder)(nil)

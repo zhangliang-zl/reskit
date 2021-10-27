@@ -1,7 +1,7 @@
 package db
 
 import (
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/zhangliang-zl/reskit/logs"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
@@ -15,14 +15,14 @@ type Options struct {
 	connMaxIdleTime time.Duration
 	slowThreshold   time.Duration
 	disableAutoPing bool
-	Logger          *log.Helper
+	Logger          logs.Logger
 }
 
 func New(dsn string, opts ...Option) (*gorm.DB, error) {
 
 	o := &Options{
-		maxOpenConns:    DefaultMaxOpenConns,
-		maxIdleConns:    DefaultMaxIdleConns,
+		maxOpenConns:    DefaultMaxOpenConnections,
+		maxIdleConns:    DefaultMaxIdleConnections,
 		connMaxIdleTime: DefaultConnMaxIdleTime,
 		connMaxLifetime: DefaultConnMaxLifetime,
 		slowThreshold:   DefaultSlowThreshold,

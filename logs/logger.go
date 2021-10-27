@@ -3,7 +3,6 @@ package logs
 import (
 	"context"
 	"fmt"
-	"github.com/zhangliang-zl/reskit/logs/stdout"
 	"os"
 )
 
@@ -54,9 +53,9 @@ func (d *logger) record(ctx context.Context, level Level, msg string, data ...in
 		msg = fmt.Sprintf(msg, data...)
 	}
 
-	prefix := fmt.Sprintf("level=%s, tag=%s, trace_id=%s, msg=%s", level.String(), d.tag, traceID, msg)
+	msg = fmt.Sprintf("level=%s, tag=%s, trace_id=%s, msg=%s", level.String(), d.tag, traceID, msg)
 
-	d.w.Record(prefix + msg)
+	d.w.Record(msg)
 }
 
 func NewLogger(recorder Recorder, level Level, tag string) Logger {
@@ -66,6 +65,3 @@ func NewLogger(recorder Recorder, level Level, tag string) Logger {
 		tag:   tag,
 	}
 }
-
-var DefaultTag = ""
-var DefaultLogger = NewLogger(stdout.NewRecorder(), LevelInfo, DefaultTag)

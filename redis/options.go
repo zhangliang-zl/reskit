@@ -1,17 +1,19 @@
 package redis
 
-import "github.com/go-kratos/kratos/v2/log"
+import (
+	"github.com/zhangliang-zl/reskit/logs"
+)
 
 var DefaultOption = &Options{
 	addr:     "127.0.0.1:6379",
 	password: "",
 	dbNum:    0,
-	logger:   log.NewHelper(log.With(log.DefaultLogger, "tag", "redis")),
+	logger:   logs.DefaultLogger("redis"),
 }
 
 type Option func(options *Options)
 
-func Logger(logger *log.Helper) Option {
+func Logger(logger logs.Logger) Option {
 	return func(o *Options) {
 		o.logger = logger
 	}
