@@ -1,4 +1,4 @@
-package web
+package server
 
 import (
 	"github.com/zhangliang-zl/reskit/logs"
@@ -18,7 +18,7 @@ var (
 	DefaultReadTimeout     = time.Second * 300
 	DefaultWriteTimeout    = time.Second * 300
 	DefaultSlowThresholdMS = 200
-	DefaultLogger          = logs.DefaultLogger("web")
+	DefaultLogger          = logs.DefaultLogger("server")
 	DefaultMiddlewares     = []HandlerFunc{
 		Recovery(DefaultLogger),
 		Speed(DefaultLogger, DefaultSlowThresholdMS),

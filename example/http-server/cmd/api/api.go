@@ -8,7 +8,7 @@ import (
 	"github.com/zhangliang-zl/reskit/example/http-server/pkg/route"
 	"github.com/zhangliang-zl/reskit/logs"
 	"github.com/zhangliang-zl/reskit/redis"
-	"github.com/zhangliang-zl/reskit/web"
+	"github.com/zhangliang-zl/reskit/server"
 )
 
 func main() {
@@ -18,8 +18,8 @@ func main() {
 		logs.DefaultLogger("app").Fatal(ctx, err.Error())
 	}
 
-	srv := web.New()
-	srv.Middleware(web.SimpleTracing())
+	srv := server.New()
+	srv.Middleware(server.SimpleTracing())
 	route.Init(srv)
 
 	app := reskit.New(

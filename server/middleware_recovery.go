@@ -1,8 +1,8 @@
-package web
+package server
 
 import (
 	"github.com/zhangliang-zl/reskit/logs"
-	"github.com/zhangliang-zl/reskit/web/httperror"
+	"github.com/zhangliang-zl/reskit/server/httperror"
 	"runtime"
 )
 
