@@ -6,16 +6,18 @@ import (
 )
 
 type Worker struct {
-	mu        sync.Mutex
-	timestamp int64
-	workerId  int64
-	number    int64
+	id         int64
+	workerBits int64
+	numberBits int64 // 每秒最大位数
+	epoch      int64 // system start use time
 
-	numberBits  int64 // 每秒最大位数
 	numberMax   int64
 	timeShift   int64
 	workerShift int64
-	epoch       int64 // system start use time
+
+	mu        sync.Mutex
+	timestamp int64
+	seq       int64
 }
 
 func (w *Worker) NextID() int64 {
@@ -24,43 +26,79 @@ func (w *Worker) NextID() int64 {
 
 	now := time.Now().UnixNano() / 1e9
 	if w.timestamp == now {
-		w.number++
+		w.seq++
 
-		if w.number > w.numberMax {
+		if w.seq > w.numberMax {
 			for now <= w.timestamp {
 				now = time.Now().UnixNano() / 1e9
 			}
 		}
 	} else {
-		w.number = 0
+		w.seq = 0
 		w.timestamp = now
 	}
 
-	return (now-w.epoch)<<w.timeShift | (w.workerId << w.workerShift) | (w.number)
+	return (now-w.epoch)<<w.timeShift | (w.id << w.workerShift) | (w.seq)
 }
 
+var (
+	DefaultWorkerID   int64 = 0
+	DefaultWorkerBits int64 = 5 // 32个节点
+	DefaultNumberBits int64 = 17 // 每秒最多生产2的17次方 (131072) 个ID
+	DefaultEpoch      int64 = 1621481706 // 2021-05-20 11:35:06
+)
+
 // NewWorker is Worker Constructor
-// workerBits workerID 位数
-// numberBits 每秒可容纳的ID数量
-// epoch  表示系统开始使用该worker的时间戳
-func NewWorker(workerId, workerBits, numberBits, epoch int64) (*Worker, error) {
+func NewWorker(opts ...Option) *Worker {
+
+	w := &Worker{
+		id:         DefaultWorkerID,
+		workerBits: DefaultWorkerBits,
+		numberBits: DefaultNumberBits,
+		epoch:      DefaultEpoch,
+	}
+
+	for _, opt := range opts {
+		opt(w)
+	}
+
 	var (
-		workerMax   int64 = -1 ^ (-1 << workerBits)
-		numberMax   int64 = -1 ^ (-1 << numberBits)
-		timeShift         = workerBits + numberBits
-		workerShift       = numberBits
+		workerMax   int64 = -1 ^ (-1 << w.workerBits)
+		numberMax   int64 = -1 ^ (-1 << w.numberBits)
+		timeShift         = w.workerBits + w.numberBits
+		workerShift       = w.numberBits
+		id                = w.id % workerMax
 	)
 
-	workerId = workerId % workerMax
+	w.id = id
+	w.timeShift = timeShift
+	w.workerShift = workerShift
+	w.numberMax = numberMax
+	return w
+}
 
-	return &Worker{
-		timestamp: 0,
-		workerId:  workerId,
-		number:    0,
+type Option func(worker *Worker)
 
-		numberMax:   numberMax,
-		timeShift:   timeShift,
-		workerShift: workerShift,
-		epoch:       epoch,
-	}, nil
+func WorkerIDBits(workerBits int64) Option {
+	return func(worker *Worker) {
+		worker.workerBits = workerBits
+	}
+}
+
+func Id(id int64) Option {
+	return func(worker *Worker) {
+		worker.id = id
+	}
+}
+
+func NumberBits(numberBits int64) Option {
+	return func(worker *Worker) {
+		worker.numberBits = numberBits
+	}
+}
+
+func Epoch(e int64) Option {
+	return func(worker *Worker) {
+		worker.epoch = e
+	}
 }

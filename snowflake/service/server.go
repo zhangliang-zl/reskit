@@ -12,6 +12,7 @@ import (
 
 type Server struct {
 	port     int
+	cancel   chan bool
 	logger   logs.Logger
 	idWorker *snowflake.Worker
 }
@@ -25,11 +26,12 @@ type ServerOptions struct {
 }
 
 func NewServer(opts ServerOptions, logger logs.Logger) (*Server, error) {
-	workerID := opts.WorkerID
-	idWorker, err := snowflake.NewWorker(workerID, opts.WorkerBits, opts.NumberBits, opts.Epoch)
-	if err != nil {
-		return nil, err
-	}
+	idWorker := snowflake.NewWorker(
+		snowflake.Id(opts.WorkerID),
+		snowflake.WorkerIDBits(opts.WorkerBits),
+		snowflake.NumberBits(opts.NumberBits),
+		snowflake.Epoch(opts.Epoch),
+	)
 
 	return &Server{
 		port:     opts.Port,
@@ -38,8 +40,7 @@ func NewServer(opts ServerOptions, logger logs.Logger) (*Server, error) {
 	}, nil
 }
 
-func (s *Server) Run() error {
-	ctx := context.Background()
+func (s *Server) Start(ctx context.Context) error {
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", fmt.Sprintf(":%d", s.port))
 	if err != nil {
 		return err
@@ -52,13 +53,24 @@ func (s *Server) Run() error {
 	defer listener.Close()
 
 	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			s.logger.Error(ctx, "Accept Error:%s", err.Error())
-			continue
+		select {
+		case <-s.cancel:
+			return s.Stop(ctx)
+
+		default:
+			conn, err := listener.Accept()
+			if err != nil {
+				s.logger.Error(ctx, "Accept Error:%s", err.Error())
+				continue
+			}
+			go s.handle(conn)
 		}
-		go s.handle(conn)
 	}
+}
+
+func (s *Server) Stop(_ context.Context) error {
+	s.cancel <- true
+	return nil
 }
 
 func (s *Server) handle(conn net.Conn) error {

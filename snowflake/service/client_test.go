@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"github.com/zhangliang-zl/reskit/logs"
 	"testing"
 	"time"
@@ -12,7 +13,7 @@ func startServer(opts ServerOptions) error {
 	if err != nil {
 		return err
 	}
-	if err := ser.Run(); err != nil {
+	if err := ser.Start(context.Background()); err != nil {
 		return err
 	}
 
