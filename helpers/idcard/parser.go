@@ -4,12 +4,13 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
-	GenderUnknow = 0
-	GenderMale   = 1
-	GenderFemale = 2
+	GenderUnknow = "未知"
+	GenderMale   = "男"
+	GenderFemale = "女"
 )
 
 var (
@@ -37,7 +38,22 @@ func (p *Parser) Birthday() string {
 	}
 }
 
-func (p *Parser) Gender() int {
+func (p *Parser) Age() int {
+	birthday := p.Birthday()
+
+	birYear, _ := strconv.Atoi(birthday[0:4])
+
+	birMonth, _ := strconv.Atoi(strings.TrimRight(birthday[4:6], "0"))
+
+	age := time.Now().Year() - birYear
+
+	if int(time.Now().Month()) < birMonth {
+		age--
+	}
+	return age
+}
+
+func (p *Parser) Gender() string {
 	var g string
 	if len(p.id) == 18 {
 		g = p.id[16:17]
@@ -54,7 +70,7 @@ func (p *Parser) Gender() int {
 	return GenderMale
 }
 
-func (p Parser) Validate() bool {
+func (p *Parser) Validate() bool {
 	if len(p.id) != 15 && len(p.id) != 18 {
 		return false
 	}
@@ -77,6 +93,52 @@ func (p Parser) checkBirthday() bool {
 	pattern := `^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})(((0[13578]|1[02])(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)(0[1-9]|[12][0-9]|30))|(02(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))0229)$`
 	matched, _ := regexp.MatchString(pattern, p.Birthday())
 	return matched
+}
+
+func (p Parser) Province() string {
+	provinces := make(map[string]string)
+	provinces["11"] = "北京市"
+	provinces["12"] = "天津市"
+	provinces["13"] = "河北省"
+	provinces["14"] = "山西省"
+	provinces["15"] = "内蒙古自治区"
+	provinces["21"] = "辽宁省"
+	provinces["22"] = "吉林省"
+	provinces["23"] = "黑龙江省"
+	provinces["31"] = "上海市"
+	provinces["32"] = "江苏省"
+	provinces["33"] = "浙江省"
+	provinces["34"] = "安徽省"
+	provinces["35"] = "福建省"
+	provinces["36"] = "江西省"
+	provinces["37"] = "山东省"
+	provinces["41"] = "河南省"
+	provinces["42"] = "湖北省"
+	provinces["43"] = "湖南省"
+	provinces["44"] = "广东省"
+	provinces["45"] = "广西壮族自治区"
+	provinces["46"] = "海南省"
+	provinces["50"] = "重庆市"
+	provinces["51"] = "四川省"
+	provinces["52"] = "贵州省"
+	provinces["53"] = "云南省"
+	provinces["54"] = "西藏自治区"
+	provinces["61"] = "陕西省"
+	provinces["62"] = "甘肃省"
+	provinces["63"] = "青海省"
+	provinces["64"] = "宁夏回族自治区"
+	provinces["65"] = "新疆维吾尔自治区"
+	provinces["71"] = "台湾省"
+	provinces["81"] = "香港特别行政区"
+	provinces["82"] = "澳门特别行政区"
+
+	left := p.id[0:2]
+	pro, ok := provinces[left]
+	if !ok {
+		return "未知"
+	}
+
+	return pro
 }
 
 func (p Parser) checkLastCode() bool {

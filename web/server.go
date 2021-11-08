@@ -1,4 +1,4 @@
-package server
+package web
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/zhangliang-zl/reskit"
 	"github.com/zhangliang-zl/reskit/helpers/validation"
 	"github.com/zhangliang-zl/reskit/logs"
-	"github.com/zhangliang-zl/reskit/server/httperror"
+	"github.com/zhangliang-zl/reskit/web/httperror"
 	"net"
 	"net/http"
 	"sync"
@@ -51,7 +51,7 @@ func (s *Server) Stop(ctx context.Context) error {
 	defer s.mu.Unlock()
 	err := s.httpServer.Shutdown(ctx)
 	if err != nil {
-		s.opts.logger.Error(ctx, "server shutdown error :%s", err.Error())
+		s.opts.logger.Error(ctx, "web shutdown error :%s", err.Error())
 	}
 
 	return err
@@ -69,7 +69,7 @@ func (s *Server) Start(ctx context.Context) error {
 		},
 	}
 	s.mu.Unlock()
-	s.opts.logger.Info(ctx, "server start...")
+	s.opts.logger.Info(ctx, "web start...")
 	err := s.httpServer.ListenAndServe()
 	if err != nil && err.Error() != "http: Server closed" {
 		return err
