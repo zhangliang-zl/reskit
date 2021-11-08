@@ -21,13 +21,13 @@ type Options struct {
 func New(dsn string, opts ...Option) (*gorm.DB, error) {
 
 	o := &Options{
-		maxOpenConns:    DefaultMaxOpenConnections,
-		maxIdleConns:    DefaultMaxIdleConnections,
-		connMaxIdleTime: DefaultConnMaxIdleTime,
-		connMaxLifetime: DefaultConnMaxLifetime,
-		slowThreshold:   DefaultSlowThreshold,
+		maxOpenConns:    100,
+		maxIdleConns:    100,
+		connMaxIdleTime: 100 * time.Millisecond,
+		connMaxLifetime: 300 * time.Second,
+		slowThreshold:   300 * time.Second,
 		disableAutoPing: true,
-		Logger:          DefaultLogger,
+		Logger:          logs.DefaultLogger("_db"),
 	}
 
 	for _, opt := range opts {

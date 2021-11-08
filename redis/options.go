@@ -4,13 +4,6 @@ import (
 	"github.com/zhangliang-zl/reskit/logs"
 )
 
-var DefaultOption = &Options{
-	addr:     "127.0.0.1:6379",
-	password: "",
-	dbNum:    0,
-	logger:   logs.DefaultLogger("redis"),
-}
-
 type Option func(options *Options)
 
 func Logger(logger logs.Logger) Option {

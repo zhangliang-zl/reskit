@@ -5,15 +5,6 @@ import (
 	"time"
 )
 
-var (
-	DefaultMaxOpenConnections = 100
-	DefaultMaxIdleConnections = 100
-	DefaultSlowThreshold      = 100 * time.Millisecond
-	DefaultConnMaxLifetime    = 300 * time.Second
-	DefaultConnMaxIdleTime    = 300 * time.Second
-	DefaultLogger             = logs.DefaultLogger("db")
-)
-
 type Option func(options *Options)
 
 func MaxOpenConnections(num int) Option {

@@ -15,7 +15,13 @@ type Options struct {
 }
 
 func New(opts ...Option) (*redis.Client, error) {
-	o := DefaultOption
+
+	var o = &Options{
+		addr:     "127.0.0.1:6379",
+		password: "",
+		dbNum:    0,
+		logger:   logs.DefaultLogger("_redis"),
+	}
 
 	for _, opt := range opts {
 		opt(o)

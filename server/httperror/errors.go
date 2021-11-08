@@ -4,6 +4,11 @@ import (
 	"net/http"
 )
 
+type ErrorInterface interface {
+	Error() string
+	GetCode() int
+}
+
 type Error struct {
 	Code    int
 	Message string

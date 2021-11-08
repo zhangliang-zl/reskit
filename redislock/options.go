@@ -1,12 +1,8 @@
 package redislock
 
-import "time"
-
-var (
-	DefaultKeyPrefix     = "MutexLocker:"
-	DefaultRetryInterval = 20 * time.Millisecond
-	DefaultLocked        = 30 * time.Second
-	DefaultLockWaiting   = 120 * time.Second
+import (
+	"github.com/zhangliang-zl/reskit/logs"
+	"time"
 )
 
 type Options struct {
@@ -14,6 +10,7 @@ type Options struct {
 	lockWaiting   time.Duration
 	retryInterval time.Duration
 	keyPrefix     string
+	logger        logs.Logger
 }
 
 type Option func(o *Options)

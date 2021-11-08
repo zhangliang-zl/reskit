@@ -13,20 +13,19 @@ type StdoutFactory struct {
 	sync.Map
 }
 
-func (factory *StdoutFactory) Get(tag string) (Logger, error) {
+func (factory *StdoutFactory) Get(tag string) Logger {
 	v, ok := factory.Load(tag)
 	if !ok {
-
 		logger := NewLogger(stdout.NewRecorder(), factory.level, tag)
 		factory.Store(tag, logger)
-		return logger, nil
+		return logger
 	}
 
-	return v.(Logger), nil
+	return v.(Logger)
 }
 
-func NewStdoutFactory(level Level ) LoggerFactory {
+func NewStdoutFactory(level Level) LoggerFactory {
 	return &StdoutFactory{
-		level:       level,
+		level: level,
 	}
 }

@@ -41,21 +41,14 @@ func (w *Worker) NextID() int64 {
 	return (now-w.epoch)<<w.timeShift | (w.id << w.workerShift) | (w.seq)
 }
 
-var (
-	DefaultWorkerID   int64 = 0
-	DefaultWorkerBits int64 = 5 // 32个节点
-	DefaultNumberBits int64 = 17 // 每秒最多生产2的17次方 (131072) 个ID
-	DefaultEpoch      int64 = 1621481706 // 2021-05-20 11:35:06
-)
-
 // NewWorker is Worker Constructor
 func NewWorker(opts ...Option) *Worker {
 
 	w := &Worker{
-		id:         DefaultWorkerID,
-		workerBits: DefaultWorkerBits,
-		numberBits: DefaultNumberBits,
-		epoch:      DefaultEpoch,
+		id:         0,
+		workerBits: 5,          // 32个节点
+		numberBits: 17,         // 每秒最多生产2的17次方 (131072) 个ID
+		epoch:      1621481706, // 2021-05-20 11:35:06
 	}
 
 	for _, opt := range opts {

@@ -3,11 +3,15 @@ package server
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/zhangliang-zl/reskit"
+	"github.com/zhangliang-zl/reskit/helpers/validation"
+	"github.com/zhangliang-zl/reskit/logs"
 	"github.com/zhangliang-zl/reskit/server/httperror"
 	"net"
 	"net/http"
 	"sync"
+	"time"
 )
 
 type HandlerFunc func(*Context)
@@ -20,7 +24,7 @@ type Server struct {
 	mu         sync.Mutex
 }
 
-func (s *Server) Route(method, relativePath string, handlers ...HandlerFunc) {
+func (s *Server) AddRoute(method, relativePath string, handlers ...HandlerFunc) {
 	ginHandlers := make([]gin.HandlerFunc, 0)
 	for _, h := range handlers {
 		ginHandlers = append(ginHandlers, s.makeGinHandlerFunc(h))
@@ -77,12 +81,18 @@ func (s *Server) Start(ctx context.Context) error {
 func New(opts ...Option) *Server {
 	gin.SetMode(gin.ReleaseMode)
 
+	logger := logs.DefaultLogger("_server")
+
 	o := &Options{
-		address:      DefaultAddress,
-		writeTimeout: DefaultWriteTimeout,
-		readTimeout:  DefaultReadTimeout,
-		logger:       DefaultLogger,
-		middlewares:  DefaultMiddlewares,
+		address:      ":8080",
+		writeTimeout: time.Second * 300,
+		readTimeout:  time.Second * 300,
+		logger:       logger,
+		middleware: []HandlerFunc{
+			Recovery(logger),
+			Speed(logger, 200),
+			RequestParams(logger),
+		},
 	}
 
 	for _, opt := range opts {
@@ -94,7 +104,7 @@ func New(opts ...Option) *Server {
 		opts:   o,
 	}
 
-	for _, middlewareFunc := range o.middlewares {
+	for _, middlewareFunc := range o.middleware {
 		s.Middleware(middlewareFunc)
 	}
 
@@ -118,3 +128,7 @@ func noMethod(c *gin.Context) {
 
 // 屏蔽编辑器报错信息
 var _ reskit.Server = (*Server)(nil)
+
+func BindValidator(validator *validation.Validator) {
+	binding.Validator = validator
+}

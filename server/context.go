@@ -15,7 +15,7 @@ func (c *Context) Success(obj interface{}) {
 	c.Context.JSON(200, obj)
 }
 
-func (c *Context) SendError(err httperror.Error) {
+func (c *Context) SendError(err httperror.ErrorInterface) {
 	sendError(c.Context, err)
 }
 
@@ -35,7 +35,7 @@ func (c *Context) Forbidden(err error) {
 	sendError(c.Context, httperror.NewForbidden(err.Error()))
 }
 
-func sendError(c *gin.Context, err httperror.Error) {
+func sendError(c *gin.Context, err httperror.ErrorInterface) {
 	code := err.GetCode()
 	if code < 400 || code > 599 {
 		code = http.StatusInternalServerError

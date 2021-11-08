@@ -1,6 +1,8 @@
 package logs
 
 import (
+	"context"
+	"github.com/zhangliang-zl/reskit/logs/stdout"
 	syslogrecord "github.com/zhangliang-zl/reskit/logs/syslog"
 	"log/syslog"
 	"sync"
@@ -13,19 +15,23 @@ type SyslogFactory struct {
 	sync.Map
 }
 
-func (factory *SyslogFactory) Get(tag string) (Logger, error) {
+func (factory *SyslogFactory) Get(tag string) Logger {
 	v, ok := factory.Load(tag)
 	if !ok {
+		tag = factory.projectName + "/" + tag
 		record, err := syslogrecord.NewRecorder(tag, syslogrecord.Priority(factory.priority))
 		logger := NewLogger(record, factory.level, tag)
 		if err != nil {
-			factory.Store(tag, logger)
+			// syslog 出错，使用stdout logger
+			logger = NewLogger(stdout.NewRecorder(), DefaultLevel, tag)
+			logger.Error(context.Background(), "syslog create error %s", err.Error())
 		}
 
-		return logger, err
+		factory.Store(tag, logger)
+		return logger
 	}
 
-	return v.(Logger), nil
+	return v.(Logger)
 }
 
 func NewSyslogFactory(level Level, priority syslog.Priority, projectName string) LoggerFactory {

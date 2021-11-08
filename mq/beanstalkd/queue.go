@@ -83,10 +83,10 @@ func NewQueue(addr string, opts ...Option) (mq.Queue, error) {
 	}
 
 	o := &Options{
-		minPriority:    DefaultMinPriority,
-		maxPriority:    DefaultMaxPriority,
-		maxWorkingTTL:  DefaultMaxWorkingTTL,
-		failRetryDelay: DefaultFailRetryDelay,
+		minPriority:    0,
+		maxPriority:    1024,
+		maxWorkingTTL:  time.Second * 120,
+		failRetryDelay: time.Second * 10,
 	}
 
 	for _, opt := range opts {

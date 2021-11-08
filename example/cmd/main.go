@@ -15,7 +15,7 @@ func main() {
 	ctx := context.Background()
 	err := initPersist()
 	if err != nil {
-		logs.DefaultLogger("app").Fatal(ctx, err.Error())
+		logs.DefaultLogger("_app").Fatal(ctx, err.Error())
 	}
 
 	srv := server.New()
@@ -26,7 +26,7 @@ func main() {
 	)
 
 	if err := app.Run(); err != nil {
-		logs.DefaultLogger("app").Fatal(ctx, err.Error())
+		logs.DefaultLogger("_app").Fatal(ctx, err.Error())
 	}
 }
 
@@ -34,7 +34,7 @@ func initPersist() error {
 	// init redis
 	rds, err := redis.New()
 	if err != nil {
-		logs.DefaultLogger("app").Fatal(context.Background(), err.Error())
+		logs.DefaultLogger("_app").Fatal(context.Background(), err.Error())
 	}
 	persist.KVStore = rds
 

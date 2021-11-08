@@ -7,5 +7,5 @@ import (
 
 func Init(srv *server.Server) {
 	userCtrl := &controlelr.UserController{}
-	srv.Route("GET", "/user/info", userCtrl.Info)
+	srv.AddRoute("GET", "/user/info", userCtrl.Info)
 }

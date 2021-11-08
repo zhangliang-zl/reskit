@@ -31,14 +31,18 @@ func (s *Server) Stop(_ context.Context) error {
 	}
 }
 
-var DefaultCloseTimeout = 60 * time.Second
-
 type Option func(server *Server)
+
+func CloseTimeout(duration time.Duration) Option {
+	return func(server *Server) {
+		server.closeTimeout = duration
+	}
+}
 
 func NewServer(c *cron.Cron, opts ...Option) *Server {
 	s := &Server{
 		Cron:         c,
-		closeTimeout: DefaultCloseTimeout,
+		closeTimeout: 60 * time.Second,
 	}
 
 	for _, opt := range opts {

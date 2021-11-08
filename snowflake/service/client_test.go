@@ -8,7 +8,7 @@ import (
 )
 
 func startServer(opts ServerOptions) error {
-	logger := logs.DefaultLogger("uuid")
+	logger := logs.DefaultLogger("_uuid")
 	ser, err := NewServer(opts, logger)
 	if err != nil {
 		return err

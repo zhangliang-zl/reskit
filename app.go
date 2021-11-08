@@ -92,19 +92,11 @@ func (a *App) Run() error {
 	return nil
 }
 
-func (a *App) Name() string {
-	return a.opts.name
-}
-
-func (a *App) Env() string {
-	return a.opts.env
-}
-
 func New(opts ...Option) *App {
+
 	o := &Options{
-		env:     "dev",
 		sigs:    []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
-		logger:  logs.DefaultLogger("app"),
+		logger:  logs.DefaultLogger("_app"),
 		servers: make([]Server, 0),
 		ctx:     context.Background(),
 	}

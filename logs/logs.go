@@ -20,7 +20,7 @@ type Logger interface {
 }
 
 type LoggerFactory interface {
-	Get(tag string) (Logger, error)
+	Get(tag string) Logger
 }
 
 var _ Recorder = (*stdout.Recorder)(nil)

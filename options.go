@@ -9,9 +9,6 @@ import (
 type Option func(options *Options)
 
 type Options struct {
-	env  string
-	name string
-
 	ctx     context.Context
 	servers []Server
 
@@ -23,18 +20,6 @@ type Options struct {
 
 	sigs   []os.Signal
 	logger logs.Logger
-}
-
-func Name(name string) Option {
-	return func(o *Options) {
-		o.name = name
-	}
-}
-
-func Env(env string) Option {
-	return func(o *Options) {
-		o.env = env
-	}
 }
 
 func Servers(servers ...Server) Option {

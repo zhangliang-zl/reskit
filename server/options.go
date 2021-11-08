@@ -7,24 +7,11 @@ import (
 
 type Options struct {
 	address      string
-	middlewares  []HandlerFunc
+	middleware   []HandlerFunc
 	readTimeout  time.Duration
 	writeTimeout time.Duration
 	logger       logs.Logger
 }
-
-var (
-	DefaultAddress         = ":8080"
-	DefaultReadTimeout     = time.Second * 300
-	DefaultWriteTimeout    = time.Second * 300
-	DefaultSlowThresholdMS = 200
-	DefaultLogger          = logs.DefaultLogger("server")
-	DefaultMiddlewares     = []HandlerFunc{
-		Recovery(DefaultLogger),
-		Speed(DefaultLogger, DefaultSlowThresholdMS),
-		RequestParams(DefaultLogger),
-	}
-)
 
 type Option func(*Options)
 
@@ -34,9 +21,9 @@ func Address(address string) Option {
 	}
 }
 
-func Middleware(middlewares ...HandlerFunc) Option {
+func Middleware(middleware ...HandlerFunc) Option {
 	return func(o *Options) {
-		o.middlewares = middlewares
+		o.middleware = middleware
 	}
 }
 

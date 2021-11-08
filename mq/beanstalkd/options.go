@@ -2,13 +2,6 @@ package mq
 
 import "time"
 
-var (
-	DefaultMinPriority    uint32 = 0
-	DefaultMaxPriority    uint32 = 1024
-	DefaultMaxWorkingTTL         = time.Second * 120
-	DefaultFailRetryDelay        = time.Second * 10
-)
-
 type Options struct {
 	minPriority    uint32
 	maxPriority    uint32

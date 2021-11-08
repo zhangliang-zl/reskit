@@ -3,9 +3,8 @@ package redislock
 import (
 	"github.com/go-redis/redis/v8"
 	"github.com/zhangliang-zl/reskit/logs"
+	"time"
 )
-
-var DefaultLogger = logs.DefaultLogger("lock")
 
 type FactoryOption func(factory *Factory)
 
@@ -17,7 +16,7 @@ func Logger(logger logs.Logger) FactoryOption {
 
 func NewFactory(rdsClient *redis.Client, opts ...FactoryOption) *Factory {
 	f := &Factory{
-		logger:    DefaultLogger,
+		logger:    logs.DefaultLogger("_lock"),
 		rdsClient: rdsClient,
 	}
 	for _, opt := range opts {
@@ -33,11 +32,12 @@ type Factory struct {
 }
 
 func (f *Factory) New(key string, opts ...Option) *Mutex {
+
 	var o = &Options{
-		duration:      DefaultLocked,
-		lockWaiting:   DefaultLockWaiting,
-		retryInterval: DefaultRetryInterval,
-		keyPrefix:     DefaultKeyPrefix,
+		duration:      30 * time.Second,
+		lockWaiting:   120 * time.Second,
+		retryInterval: 20 * time.Millisecond,
+		keyPrefix:     "MutexLocker:",
 	}
 
 	for _, opt := range opts {

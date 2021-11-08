@@ -250,7 +250,7 @@ func (c *Client) Get(key string) (item *Item, err error) {
 }
 
 func (c *Client) UUID() (string, error) {
-	maxRetry :=2
+	maxRetry := 2
 	retry := 0
 
 	for {

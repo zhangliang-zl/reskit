@@ -1,27 +1,30 @@
 package logs
 
 import (
-	"log"
 	"log/syslog"
 )
 
 func DefaultLogger(tag string) Logger {
-	logger, err := DefaultLoggerFactory.Get(tag)
-	if err != nil {
-		log.Printf("logger load error:%s\n; auto switch stdout logger factory", err.Error())
-		SwitchStdout(DefaultLevel)
-	}
-
-	return logger
+	return DefaultLoggerFactory.Get(tag)
 }
 
 var DefaultLevel = LevelInfo
+
 var DefaultLoggerFactory = NewStdoutFactory(DefaultLevel)
 
-func SwitchSyslog(level Level, pri syslog.Priority, projectName string) {
-	DefaultLoggerFactory = NewSyslogFactory(level, pri, projectName)
+func SwitchSyslogFactory(l Level, pri syslog.Priority, projectName string) {
+	DefaultMode = ModeSyslog
+	DefaultLoggerFactory = NewSyslogFactory(l, pri, projectName)
 }
 
-func SwitchStdout(level Level) {
-	DefaultLoggerFactory = NewStdoutFactory(level)
+func SwitchStdoutFactory(l Level) {
+	DefaultMode = ModeStdout
+	DefaultLoggerFactory = NewStdoutFactory(l)
 }
+
+const (
+	ModeStdout = "stdout"
+	ModeSyslog = "syslog"
+)
+
+var DefaultMode = ModeStdout
